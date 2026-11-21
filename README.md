@@ -1,2 +1,0 @@
-# khalone-server
-.
