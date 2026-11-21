@@ -1,4 +1,4 @@
-// 금빛 여울 온라인 서버 — 채팅 · 플레이어 경매장 · 랭킹 · 전시장 구경
+// 광물 채집 플랫폼 서버 — 탐석(함께 탐석·박물관·거래소) + 금빛 여울(채팅·플레이어 경매장·랭킹·전시장)
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -9,28 +9,38 @@ const DATA = process.env.DATA_FILE || path.join(__dirname, 'data.json');
 const PUB = path.join(__dirname, 'public');
 const MIN = process.env.FAST ? 1000 : 60000; // 테스트용: FAST=1이면 1분=1초
 
-let D = { players: {}, auc: {}, mail: {}, chat: [] };
+let D = { players: {}, auc: {}, mail: {}, chat: [], ts: { museums: {}, market: {}, payouts: {}, returns: {} } };
 try { D = Object.assign(D, JSON.parse(fs.readFileSync(DATA, 'utf8'))); } catch (e) {}
+D.ts = Object.assign({ museums: {}, market: {}, payouts: {}, returns: {} }, D.ts || {});
 let dirty = false;
 setInterval(() => { if (dirty) { dirty = false; fs.writeFile(DATA, JSON.stringify(D), () => {}); } }, 5000);
 
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.json': 'application/json', '.ico': 'image/x-icon' };
+// 정적 파일: 허용된 파일만 (public 폴더가 있으면 거기서, 없으면 server.js 옆에서)
+const FILES = { '/': 'index.html', '/index.html': 'index.html', '/tamseok.html': 'tamseok.html', '/geumbit.html': 'geumbit.html' };
 const server = http.createServer((req, res) => {
-  let p = decodeURIComponent((req.url || '/').split('?')[0]);
+  const p = decodeURIComponent((req.url || '/').split('?')[0]);
   if (p === '/health') { res.writeHead(200); res.end('ok'); return; }
-  if (p === '/' || p === '') p = '/index.html';
-  // index.html은 public 폴더에 있으면 거기서, 없으면 server.js 옆에서 찾음 (파일 3개만 올려도 동작)
-  let f = path.join(PUB, path.normalize(p));
-  if (p === '/index.html' && !fs.existsSync(f)) f = path.join(__dirname, 'index.html');
-  else if (!f.startsWith(PUB)) { res.writeHead(403); res.end(); return; }
+  const name = FILES[p];
+  if (!name) { res.writeHead(404); res.end('not found'); return; }
+  let f = path.join(PUB, name);
+  if (!fs.existsSync(f)) f = path.join(__dirname, name);
   fs.readFile(f, (e, b) => {
     if (e) { res.writeHead(404); res.end('not found'); return; }
-    res.writeHead(200, { 'Content-Type': MIME[path.extname(f)] || 'application/octet-stream' });
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
     res.end(b);
   });
 });
 
-const wss = new WebSocketServer({ server, path: '/ws', maxPayload: 2 * 1024 * 1024 });
+// 금빛 여울: /ws-gb , 탐석: /ws
+const wss = new WebSocketServer({ noServer: true, maxPayload: 4 * 1024 * 1024 });
+const tss = new WebSocketServer({ noServer: true, maxPayload: 4 * 1024 * 1024 });
+server.on('upgrade', (req, sock, head) => {
+  const p = (req.url || '').split('?')[0];
+  if (p === '/ws-gb') wss.handleUpgrade(req, sock, head, ws => wss.emit('connection', ws, req));
+  else if (p === '/ws') tss.handleUpgrade(req, sock, head, ws => tss.emit('connection', ws, req));
+  else sock.destroy();
+});
 const conns = new Map(); // ws -> 플레이어 id
 const send = (ws, o) => { if (ws.readyState === 1) ws.send(JSON.stringify(o)); };
 const bc = o => { const s = JSON.stringify(o); wss.clients.forEach(c => { if (c.readyState === 1) c.send(s); }); };
@@ -141,6 +151,106 @@ wss.on('connection', ws => {
   });
   ws.on('close', () => { conns.delete(ws); bc({ t: 'online', n: online() }); });
 });
-setInterval(() => { wss.clients.forEach(ws => { if (!ws.isAlive) return ws.terminate(); ws.isAlive = false; ws.ping(); }); }, 30000);
+/* ============================ 탐석 ============================
+   같은 시드 = 같은 방(위치 동기화, 바위 파괴 공유, 표본 선착순), 박물관 공개/방문, 표본 거래소 */
+const crypto = require('crypto');
+const T = D.ts;
+const tsInfo = new Map(); // ws -> { id, nick, room, x, z, h }
+const rooms = new Map();  // seed -> { broken:Set, taken:{}, members:Set<ws>, empty:0 }
+const tsSend = (ws, o) => { if (ws.readyState === 1) ws.send(JSON.stringify(o)); };
+const tsAll = o => { const s = JSON.stringify(o); tss.clients.forEach(c => { if (c.readyState === 1 && tsInfo.has(c)) c.send(s); }); };
+const tsOf = id => [...tsInfo].filter(([, i]) => i.id === id).map(([w]) => w);
+function roomOf(seed) { let r = rooms.get(seed); if (!r) { r = { broken: new Set(), taken: {}, members: new Set(), empty: 0 }; rooms.set(seed, r); } return r; }
+function tsRoomCast(r, o, except) { const s = JSON.stringify(o); for (const w of r.members) if (w !== except && w.readyState === 1) w.send(s); }
+function tsLeave(ws) { const i = tsInfo.get(ws); if (!i || i.room == null) return; const r = rooms.get(i.room); if (r) { r.members.delete(ws); tsRoomCast(r, { t: 'bye', id: i.id }); if (!r.members.size) r.empty = Date.now(); } i.room = null; }
+const marketList = () => Object.values(T.market).sort((a, b) => b.t - a.t).slice(0, 200).map(l => ({ lid: l.lid, nick: l.nick, price: l.price, seller: l.seller, spec: l.spec, title: l.title }));
+setInterval(() => { const now = Date.now(); for (const [k, r] of rooms) if (!r.members.size && now - r.empty > 30 * 60000) rooms.delete(k); }, 60000);
 
-server.listen(PORT, () => console.log('금빛 여울 서버 실행 중 : ' + PORT));
+tss.on('connection', ws => {
+  ws.isAlive = true; ws.on('pong', () => { ws.isAlive = true; });
+  ws.on('message', raw => {
+    let m; try { m = JSON.parse(raw); } catch (e) { return; }
+    let i = tsInfo.get(ws);
+    if (m.t === 'hello') {
+      const tok = clean(m.tok, 64); if (tok.length < 8) return;
+      const id = crypto.createHash('sha1').update('ts:' + tok).digest('hex').slice(0, 12);
+      i = { id, nick: clean(m.nick, 16) || '탐석가', room: null, x: 0, z: 0, h: 0 };
+      tsInfo.set(ws, i);
+      tsSend(ws, { t: 'welcome', id, payouts: T.payouts[id] || [], returns: T.returns[id] || [] });
+      delete T.payouts[id]; delete T.returns[id]; dirty = true;
+      return;
+    }
+    if (!i) return;
+    switch (m.t) {
+      case 'nick': i.nick = clean(m.nick, 16) || i.nick; break;
+      case 'join': {
+        const seed = m.seed; if (typeof seed !== 'number' && typeof seed !== 'string') return;
+        tsLeave(ws); const r = roomOf(seed); i.room = seed; r.members.add(ws);
+        const peers = [...r.members].filter(w => w !== ws).map(w => { const q = tsInfo.get(w); return { id: q.id, nick: q.nick, x: q.x, z: q.z, h: q.h }; });
+        tsSend(ws, { t: 'world', seed, broken: [...r.broken], taken: r.taken, peers });
+        tsRoomCast(r, { t: 'peer', p: { id: i.id, nick: i.nick, x: i.x, z: i.z, h: i.h } }, ws);
+        break;
+      }
+      case 'leave': tsLeave(ws); break;
+      case 'pos': {
+        if (i.room == null) return; i.x = +m.x || 0; i.z = +m.z || 0; i.h = +m.h || 0;
+        const r = rooms.get(i.room); if (r) tsRoomCast(r, { t: 'pos', id: i.id, x: i.x, z: i.z, h: i.h, w: m.w ? 1 : 0, r: m.r ? 1 : 0, s: m.s ? 1 : 0 }, ws);
+        break;
+      }
+      case 'brk': {
+        if (i.room == null || m.seed !== i.room) return; const r = rooms.get(i.room); if (!r) return;
+        if (r.broken.size < 5000) r.broken.add(m.i); tsRoomCast(r, { t: 'brk', i: m.i, seed: m.seed, nick: i.nick }, ws);
+        break;
+      }
+      case 'claim': {
+        if (i.room == null || m.seed !== i.room) return; const r = rooms.get(i.room); if (!r) return;
+        const key = String(m.key);
+        if (r.taken[key] == null) { r.taken[key] = i.nick; tsSend(ws, { t: 'claim_ok', key: m.key }); tsRoomCast(r, { t: 'taken', key: m.key, seed: m.seed, nick: i.nick }, ws); }
+        else tsSend(ws, { t: 'claim_no', key: m.key, nick: r.taken[key] });
+        break;
+      }
+      case 'museum_pub': {
+        const specs = Array.isArray(m.specs) ? m.specs.slice(0, 80) : [];
+        if (JSON.stringify(specs).length > 3.5e6) { tsSend(ws, { t: 'err', msg: '전시 표본이 너무 커서 공개할 수 없어요' }); return; }
+        if (specs.length) T.museums[i.id] = { nick: clean(m.nick, 16) || i.nick, specs, t: Date.now() }; else delete T.museums[i.id];
+        dirty = true; break;
+      }
+      case 'museums_get':
+        tsSend(ws, { t: 'museums', list: Object.entries(T.museums).sort((a, b) => b[1].t - a[1].t).slice(0, 100).map(([id, x]) => ({ id, nick: x.nick, n: x.specs.length, top: x.specs[0] && (x.specs[0].name || null) })) });
+        break;
+      case 'museum_get': { const x = T.museums[clean(m.id, 20)]; tsSend(ws, { t: 'museum', nick: x ? x.nick : '탐석가', specs: x ? x.specs : [] }); break; }
+      case 'market_get': tsSend(ws, { t: 'market', list: marketList(), mine: [] }); break;
+      case 'list': {
+        const price = Math.floor(+m.price || 0);
+        if (!m.spec || typeof m.spec !== 'object' || price < 1000 || price > 1e11) { tsSend(ws, { t: 'err', msg: '가격이 올바르지 않아요' }); return; }
+        if (Object.values(T.market).filter(l => l.seller === i.id).length >= 10) { tsSend(ws, { t: 'err', msg: '한 사람당 10개까지 올릴 수 있어요' }); return; }
+        const lid = crypto.randomBytes(6).toString('hex');
+        T.market[lid] = { lid, seller: i.id, nick: i.nick, price, spec: m.spec, title: clean(m.title, 60), t: Date.now() };
+        dirty = true; tsSend(ws, { t: 'listed', sid: m.sid }); tsAll({ t: 'market', list: marketList(), mine: [] });
+        break;
+      }
+      case 'unlist': {
+        const l = T.market[clean(m.lid, 20)]; if (!l || l.seller !== i.id) return;
+        delete T.market[l.lid]; dirty = true; tsSend(ws, { t: 'unlisted', spec: l.spec }); tsAll({ t: 'market', list: marketList(), mine: [] });
+        break;
+      }
+      case 'buy': {
+        const l = T.market[clean(m.lid, 20)];
+        if (!l) { tsSend(ws, { t: 'buy_no', why: '이미 팔린 표본이에요.' }); return; }
+        if (l.seller === i.id) { tsSend(ws, { t: 'buy_no', why: '내가 올린 표본이에요.' }); return; }
+        delete T.market[l.lid]; dirty = true;
+        tsSend(ws, { t: 'bought', spec: l.spec, price: l.price });
+        const sellers = tsOf(l.seller);
+        if (sellers.length) sellers.forEach(w => tsSend(w, { t: 'sold', price: l.price, title: l.title }));
+        else (T.payouts[l.seller] = T.payouts[l.seller] || []).push({ price: l.price, title: l.title });
+        tsAll({ t: 'market', list: marketList(), mine: [] });
+        break;
+      }
+    }
+  });
+  ws.on('close', () => { tsLeave(ws); tsInfo.delete(ws); });
+});
+
+setInterval(() => { for (const W of [wss, tss]) W.clients.forEach(ws => { if (!ws.isAlive) return ws.terminate(); ws.isAlive = false; ws.ping(); }); }, 30000);
+
+server.listen(PORT, () => console.log('광물 채집 플랫폼 서버 실행 중 : ' + PORT));
