@@ -1,0 +1,9 @@
+{
+  "name": "geumbit-online",
+  "version": "1.0.0",
+  "description": "금빛 여울 온라인 서버 (채팅 · 플레이어 경매장 · 랭킹 · 전시장 구경)",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
+  "dependencies": { "ws": "^8.18.0" }
+}
