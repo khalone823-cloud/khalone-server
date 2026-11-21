@@ -44,7 +44,8 @@ svg{display:block}
 #act:not([disabled]){background:var(--gold);color:#241a02;border-color:var(--gold2);box-shadow:0 6px 22px rgba(242,193,78,.35)}
 #act:active{transform:scale(.95)}
 #act[disabled]{opacity:.55}
-#act[disabled]{}.trend{margin:6px 0 10px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.05);font-size:13px}.trend small{color:var(--mut);margin-left:6px}.trend .tg{display:inline-flex;align-items:center;gap:5px;margin:4px 8px 0 0;padding:2px 8px;border-radius:12px;font-size:12.5px}.trend .tg.up{background:rgba(120,220,120,.14);color:#a8f0a0}.trend .tg.dn{background:rgba(220,120,120,.14);color:#f0a8a8}
+.xbadge{display:inline-block;padding:0 6px;border-radius:6px;background:linear-gradient(90deg,#3a7bd5,#00d2ff);color:#fff;font-size:10.5px;font-weight:800;letter-spacing:.5px;vertical-align:1px}.xsend{border-color:rgba(90,180,255,.55)!important;color:#bfe3ff!important}
+.trend{margin:6px 0 10px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.05);font-size:13px}.trend small{color:var(--mut);margin-left:6px}.trend .tg{display:inline-flex;align-items:center;gap:5px;margin:4px 8px 0 0;padding:2px 8px;border-radius:12px;font-size:12.5px}.trend .tg.up{background:rgba(120,220,120,.14);color:#a8f0a0}.trend .tg.dn{background:rgba(220,120,120,.14);color:#f0a8a8}
 #chat{position:fixed;left:14px;bottom:14px;width:min(340px,calc(100vw - 120px));z-index:30;border-radius:12px;background:rgba(14,17,19,.72);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.08);font-size:13px;color:var(--ink)}#chatHead{display:flex;gap:8px;align-items:center;padding:6px 10px;cursor:pointer}#chatHead span{color:var(--mut);font-size:12px}#chatHead small{margin-left:auto;color:var(--mut);font-size:11px}#chatLog{max-height:0;overflow:auto;transition:max-height .2s;padding:0 10px}#chat.open #chatLog{max-height:190px;padding:4px 10px}#chatLog div{margin:3px 0;line-height:1.35;word-break:break-all}#chatLog .sys{color:var(--gold)}#chatLog b{color:#9fd0ff}#chatBar{display:none;gap:6px;padding:6px 8px}#chat.open #chatBar{display:flex}#chatIn{flex:1;min-width:0;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:var(--ink);padding:6px 8px}#chatGo{border-radius:8px;border:0;background:var(--gold);color:#1a1408;padding:0 10px;font-weight:700}#chat.ping{box-shadow:0 0 0 2px rgba(242,193,78,.6)}body.sorting #chat{display:none!important}
 .tabs{display:flex;gap:6px;margin:6px 0 10px}.tabs button{padding:7px 12px;border-radius:9px;border:1px solid var(--line);background:transparent;color:var(--ink)}.tabs button.on{background:rgba(242,193,78,.18);border-color:rgba(242,193,78,.6)}.bidin{width:96px;background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:5px 6px;margin-left:6px}table.rk{width:100%;border-collapse:collapse;font-size:13px}table.rk td,table.rk th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}table.rk td.n{text-align:right}table.rk tr.me{background:rgba(242,193,78,.1)}#mpNameIn{background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:8px}#mpDur{background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:5px}
 #bagb{position:fixed;right:30px;bottom:108px;width:60px;height:60px;border-radius:50%;border:1.5px solid rgba(160,200,255,.55);background:var(--glass);backdrop-filter:blur(14px);color:var(--ink);font-weight:700;font-size:13px;z-index:6}#bagb small{display:block;font-size:10px;opacity:.7}
@@ -329,9 +330,8 @@ const GN=512;
 const gH=tileNoise(GN,6,4),gF=tileNoise(GN,3,48);const gMix=new Float32Array(GN*GN);for(let i=0;i<gMix.length;i++)gMix[i]=gH[i]*.45+gF[i]*.55;
 const groundMap=grayTex(gMix,GN,.66,1,[70,105]),groundNor=normalTex(gMix,GN,9,[70,105]);
 const rH=tileNoise(256,6,4);const rockNor=normalTex(rH,256,7,[3,2]);
-const fineH=tileNoise(256,3,32);const hammerBump=grayTex(fineH,256,0,1,[3,3]);
-const stripeTex=(()=>{const N=256,rows=new Float32Array(N).fill(1);let y=0;while(y<N){const w=1+Math.random()*3|0,gap=2+Math.random()*8|0;for(let k=0;k<w&&y+k<N;k++)rows[y+k]=.15+Math.random()*.25;y+=w+gap}
- return canvasTex(N,(d)=>{for(let yy=0;yy<N;yy++)for(let x=0;x<N;x++){const i=(yy*N+x)*4,v=rows[yy]*255;d[i]=d[i+1]=d[i+2]=v;d[i+3]=255}},false)})();
+
+
 const sparkTex=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');const rg=g.createRadialGradient(32,32,0,32,32,32);rg.addColorStop(0,'rgba(255,255,255,1)');rg.addColorStop(.25,'rgba(255,240,190,.6)');rg.addColorStop(1,'rgba(255,220,120,0)');g.fillStyle=rg;g.fillRect(0,0,64,64);g.strokeStyle='rgba(255,255,240,.9)';g.lineWidth=2;g.beginPath();g.moveTo(32,2);g.lineTo(32,62);g.moveTo(2,32);g.lineTo(62,32);g.stroke();return new THREE.CanvasTexture(c)})();
 function woodTex(base,dark){const N=256,h=tileNoise(N,4,4);return canvasTex(N,(d)=>{for(let y=0;y<N;y++)for(let x=0;x<N;x++){const i=y*N+x;const grain=.5+.5*Math.sin(y*.55+h[(y*N+((x*.15)|0))%(N*N)]*14);const v=.75+.25*grain*(.6+.4*h[i]);TMPC.set(base).lerp(dark,1-v);d[i*4]=TMPC.r*255;d[i*4+1]=TMPC.g*255;d[i*4+2]=TMPC.b*255;d[i*4+3]=255}},true)}
 
@@ -492,6 +492,7 @@ const UP=[
  {id:'acid',n:'옥살산 처리',d:'쇳물 얼룩을 녹이는 시간이 줄어요',lv:['기본 용액 · 30초','가온 용액 · 12초','초음파 세척조 · 4초'],val:[30,12,4],cost:[0,800,2600]},
  {id:'luck',n:'광맥 감각',d:'거대 결정이 나올 확률과 표본 크기가 늘어요 (모든 채집 수단)',lv:['보통','예리한 눈 · 거대 ×2.2 · 크기 +10%','지질학자의 직감 · 거대 ×4 · 크기 +25%'],val:[1,2.2,4],cost:[0,2500,9000]},
  {id:'price',n:'감정 인맥',d:'표본을 더 비싸게 팔아요',lv:['동네 수집가 · ×1','광물 박람회 · ×1.3','국제 경매 하우스 · ×1.7'],val:[1,1.3,1.7],cost:[0,3000,12000]},
+ {id:'sortx',n:'감별 노트',d:'자갈 선별 때 시험 결과와 맞지 않는 광물을 감별표에서 자동으로 지워 줘요',lv:['없음 · 직접 비교','자동 소거 감별 노트'],val:[0,1],cost:[0,10000]},
  {id:'lens',n:'확대경',d:'자갈 함량이 보이고 지도에 광맥 구간(사금 띠·보석 자갈층·중광물 모래층)이 표시돼요',lv:['없음','있음'],val:[0,1],cost:[0,1500]}
 ];
 const upv=id=>{const u=UP.find(x=>x.id===id);return u.val[S.up[id]||0]};
@@ -513,9 +514,6 @@ function polyGeo(planes,opt={}){const P=planes.map(p=>({n:new THREE.Vector3(p.n[
  if(SP&&!opt.noDmg){const J=(1-SP.q)*.16;P.forEach(p=>{p.d*=1+rnd(-J,J)});const p0=polyVerts(P);const nd=Math.round((1-SP.q)*(SP.grain?10:4)*rnd(.6,1.3));
   for(let i=0;i<nd;i++){const n=V3(rnd(-1,1),rnd(-1,1),rnd(-1,1)).normalize();let mx=-1e9;p0.forEach(q=>{mx=Math.max(mx,n.dot(q))});if(mx>0)P.push({n,d:mx*(SP.grain?rnd(.86,.96):rnd(.74,.92)),g:0})}}
  const pts=polyVerts(P);
- if(false)for(let j=i+1;j<m;j++)for(let k=j+1;k<m;k++){const a=P[i].n,b=P[j].n,c=P[k].n;bc.crossVectors(b,c);const det=a.dot(bc);if(Math.abs(det)<1e-8)continue;ca.crossVectors(c,a);ab.crossVectors(a,b);
-  const x=new THREE.Vector3().addScaledVector(bc,P[i].d).addScaledVector(ca,P[j].d).addScaledVector(ab,P[k].d).divideScalar(det);
-  let ok=true;for(const p of P)if(p.n.dot(x)>p.d+1e-6){ok=false;break}if(ok&&!pts.some(q=>q.distanceToSquared(x)<1e-9))pts.push(x)}
  const pos=[],nor=[],uv=[],col=[],svA=[],sfA=[],feA=[],groups=[],uk=opt.uvk||.6;
  for(const p of P){const fv=pts.filter(q=>Math.abs(p.n.dot(q)-p.d)<1e-5);if(fv.length<3)continue;const cen=new THREE.Vector3();fv.forEach(q=>cen.add(q));cen.divideScalar(fv.length);
   const u=p.st?new THREE.Vector3(p.st[0],p.st[1],p.st[2]):(Math.abs(p.n.y)<.9?new THREE.Vector3(0,1,0):new THREE.Vector3(1,0,0));u.addScaledVector(p.n,-u.dot(p.n)).normalize();const v=new THREE.Vector3().crossVectors(p.n,u);
@@ -649,7 +647,7 @@ const Ry=d=>v=>v.applyAxisAngle(V3(0,1,0),d*D2R),Rz=d=>v=>v.applyAxisAngle(V3(0,
 const hexRC=(a,c)=>recip(V3(a,0,0),V3(-a/2,0,-a*Math.sqrt(3)/2),V3(0,c,0)),tetRC=(a,c)=>recip(V3(a,0,0),V3(0,0,-a),V3(0,c,0));
 // form(rc,[h,k,l],ops,d) : d 숫자 또는 'apex:y' 꼭짓점 높이
 function form(rc,hkl,ops,d,o={}){const n0=hklN(rc,hkl[0],hkl[1],hkl[2]);const dd=typeof d==='number'?d:Math.abs(n0.y)*d.apex;return symm(n0,ops).map(n=>({n:[n.x,n.y,n.z],d:dd*(1+rnd(-(o.j||.035),o.j||.035)),g:o.g||0,st:o.st?(typeof o.st==='function'?o.st([n.x,n.y,n.z]):o.st):undefined}))}
-const HEX=[Ry(60),MY,MZ],TET=[Ry(90),MY,MZ];
+const TET=[Ry(90),MY,MZ];
 const hstripe=n=>[-n[2],0,n[0]];
 
 // 광물 모델
@@ -804,10 +802,10 @@ const VAR={
  zircon:[{k:'hy',n:'히아신스 (적갈색)',p:.15,v:1.2,col:0xc0502a},{k:'cl',n:'무색 지르콘',p:.1,v:1.4,col:0xf2f2f0,op:.25},{k:'gl',n:'노란 형광 지르콘',p:.06,v:1.6,glow:0xffd040},{k:'bl',n:'청색 지르콘',p:.02,v:3,col:0x4aa0c8}],
  pyrite:[{k:'ir',n:'무지개빛 변색',p:.08,v:1.5,irid:1},{k:'mc',n:'백철석',p:.08,v:1.1,col:0xc8c8b0}],
  sapphire:[{k:'ye',n:'옐로 사파이어',p:.12,v:1.3,col:0xf0c020},{k:'pk',n:'핑크 사파이어',p:.08,v:1.6,col:0xf080b0},{k:'gr',n:'그린 사파이어',p:.06,v:.9,col:0x4a8a5a},{k:'st',n:'스타 사파이어 (실크 내포)',p:.04,v:2.4,ndl:0xf4f0e8,dense:1},{k:'pd',n:'파파라차',p:.015,v:4.5,col:0xff9a7a}],
- quartz:[{k:'sm',n:'연수정',p:.16,v:1.2,col:0x7a6a58},{k:'ct',n:'황수정',p:.05,v:1.6,col:0xe0a830},{k:'ph',n:'녹니석 팬텀',p:.06,v:1.8,ph:0x5a8a4a},{k:'tq',n:'전기석 관입 수정',p:.06,v:1.7,ndl:0x101010},{k:'sc',n:'셉터 수정',p:.04,v:2.2,scep:1},{k:'jp',n:'일본식 쌍정',p:.025,v:3.2,tw:84.5},{k:'cl',n:'수정 군집',p:.07,v:1.5,clus:4}],
+ quartz:[{k:'sm',n:'연수정',p:.16,v:1.2,col:0x7a6a58},{k:'ct',n:'황수정',p:.05,v:1.6,col:0xe0a830},{k:'ph',n:'녹니석 팬텀',p:.06,v:1.8,ph:0x5a8a4a},{k:'tq',n:'전기석 관입 수정',p:.06,v:1.7,ndl:0x101010},{k:'rq',n:'침수정 (금홍석 바늘 가득)',p:.05,v:2.4,ndl:0xd8a040,many:1},{k:'rqs',n:'은침수정',p:.02,v:2.6,ndl:0xc8c8c4,many:1},{k:'rqb',n:'별침수정 (적철석 중심 방사)',p:.008,v:4.5,ndl:0xe0b050,many:1,burst:1},{k:'sc',n:'셉터 수정',p:.04,v:2.2,scep:1},{k:'jp',n:'일본식 쌍정',p:.025,v:3.2,tw:84.5},{k:'cl',n:'수정 군집',p:.07,v:1.5,clus:4}],
  pyriteCube:[{k:'ic',n:'철십자 관통 쌍정',p:.05,v:2.5,pen:[0,0,1,90]},{k:'ir',n:'무지개빛 변색',p:.07,v:1.5,irid:1},{k:'cl',n:'정육면체 군집',p:.1,v:1.4,clus:4},{k:'sh',n:'점판암 속 황철석',p:.08,v:1.3,rock:.3}],
  garnetX:[{k:'sp',n:'스페사르틴',p:.12,v:1.5,col:0xe0701a},{k:'gr',n:'그로슐라 (녹색)',p:.06,v:2,col:0x6ab040},{k:'sch',n:'운모편암에 박힌 석류석',p:.15,v:1.2,rock:.5},{k:'cl',n:'석류석 군집',p:.08,v:1.4,clus:3}],
- amethyst:[{k:'am',n:'아메트린 (보라·노랑)',p:.05,v:2,ph:0xe0a830},{k:'lv',n:'라벤더 자수정',p:.15,v:.9,col:0xc8a8e0},{k:'sib',n:'시베리안 딥퍼플',p:.06,v:1.8,col:0x5a1a8a},{k:'sc',n:'셉터 자수정',p:.05,v:2.5,scep:1},{k:'ph',n:'팬텀 자수정',p:.05,v:1.7,ph:0xf0e8f8}],
+ amethyst:[{k:'am',n:'아메트린 (보라·노랑)',p:.05,v:2,ph:0xe0a830},{k:'lv',n:'라벤더 자수정',p:.15,v:.9,col:0xc8a8e0},{k:'sib',n:'시베리안 딥퍼플',p:.06,v:1.8,col:0x5a1a8a},{k:'sc',n:'셉터 자수정',p:.05,v:2.5,scep:1},{k:'ph',n:'팬텀 자수정',p:.05,v:1.7,ph:0xf0e8f8},{k:'rq',n:'침 자수정 (금홍석 바늘)',p:.02,v:2.6,ndl:0xd8a040,many:1}],
  ilmenite:[{k:'lx',n:'류콕신 (풍화)',p:.12,v:.8,col:0x7a6a5a},{k:'pl',n:'판상 결정',p:.05,v:1.3,shp:[1.3,.5,1.3]}],
  monazite:[{k:'ye',n:'황색 모나자이트',p:.12,v:1.2,col:0xe8c050},{k:'gr',n:'녹색 모나자이트',p:.04,v:1.6,col:0x8aa050}],
  rutile:[{k:'rd',n:'적색 투명 금홍석',p:.12,v:1.4,col:0xb0301a},{k:'ng',n:'니그린 (철 함유)',p:.12,v:.9,col:0x1a1414},{k:'sg',n:'사게나이트 망상 쌍정',p:.04,v:2,clus:3}],
@@ -854,27 +852,35 @@ const VAR={
 const varOf=s=>s&&s.var&&VAR[s.k]?VAR[s.k].find(v=>v.k===s.var):null;
 function rollVar(k,R0){const L=VAR[k];if(!L)return null;let r=R0(),a=0;for(const v of L){a+=v.p;if(r<a)return v.k}return null}
 function mainMats(root){const out=[];root.traverse(o=>{if(!o.isMesh)return;(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>{if(m&&m.uniforms&&m.uniforms.uCol&&!m.userData.incl&&!m.userData.shell)out.push(m)})});return out}
+function addNeedles(host,V,cut){const n=V.many?(cut?110:150):V.dense?40:V.cube?(cut?6:7):(cut?14:16),ip=insidePts(host.geometry,n,.82),pts=ip.out||[];if(!pts.length)return;const ext=ip.ext||1;
+ if(V.cube){const mat=cmat({metal:1,col:LC(V.cube),rough:.12});mat.userData.incl=1;const geo=ensureAttrs(new THREE.BoxGeometry(1,1,1));pts.forEach(p=>{const m=new THREE.Mesh(geo,mat);m.position.copy(p);m.scale.setScalar(ext*rnd(.03,.07));m.rotation.set(rnd(0,3),rnd(0,3),rnd(0,3));host.add(m)});return}
+ const base=new THREE.CylinderGeometry(1,1,1,5,1).toNonIndexed(),P=[],N=[],mtx=new THREE.Matrix4(),q=new THREE.Quaternion(),sc=new THREE.Vector3(),up=V3(0,1,0);
+ const ax=V.dense?[V3(1,0,0),V3(.5,0,.866),V3(-.5,0,.866)]:V.many?[0,1,2].map(()=>V3(rnd(-1,1),rnd(-1,1),rnd(-1,1)).normalize()):null;
+ const ctr=V.burst?[pts[0].clone().multiplyScalar(.3),(pts[1]||pts[0]).clone().multiplyScalar(-.3)]:null;
+ pts.forEach((p,i)=>{let dir,pos=p.clone(),L;const th=ext*(V.dense?.0035:V.many?rnd(.0016,.0034):.007);
+  if(ctr){const c=ctr[i%2];dir=p.clone().sub(c);if(dir.lengthSq()<1e-8)dir.set(0,1,0);dir.normalize();L=ext*rnd(.25,.6);pos=c.clone().addScaledVector(dir,L*.5)}
+  else{const r=p.length();L=Math.min(ext*(V.many?rnd(.3,.85):rnd(.25,.55)),Math.max(ext*.06,2*(ext*.85-r)));dir=ax?ax[i%ax.length].clone().add(V.many?V3(rnd(-.18,.18),rnd(-.18,.18),rnd(-.18,.18)):V3(0,0,0)).normalize():V3(rnd(-1,1),rnd(-1,1),rnd(-1,1)).normalize()}
+  q.setFromUnitVectors(up,dir);sc.set(th,L,th);mtx.compose(pos,q,sc);const g=base.clone().applyMatrix4(mtx);P.push(...g.attributes.position.array);N.push(...g.attributes.normal.array);g.dispose()});
+ const mg=new THREE.BufferGeometry();mg.setAttribute('position',new THREE.Float32BufferAttribute(P,3));mg.setAttribute('normal',new THREE.Float32BufferAttribute(N,3));ensureAttrs(mg);
+ const mat=cmat({metal:1,col:LC(V.ndl),rough:V.many?.16:.3});mat.userData.incl=1;host.add(new THREE.Mesh(mg,mat))}
 function applyCutVar(inner,r,id,spec){const V=varOf(spec);if(!V)return;const o=r.o;let host=null;o.traverse(q=>{if(!host&&q.isMesh&&q.geometry.userData&&q.geometry.userData.planes)host=q});if(!host)return;
  const ip0=insidePts(host.geometry,1,.01),ext=ip0.ext||1;
- if(V.ndl||V.cube){const ip=insidePts(host.geometry,V.dense?40:V.cube?6:14,.8);const mat=cmat({metal:1,col:LC(V.ndl||V.cube),rough:V.cube?.12:.3});mat.userData.incl=1;const geo=V.cube?ensureAttrs(new THREE.BoxGeometry(1,1,1)):ensureAttrs(new THREE.CylinderGeometry(1,1,1,5));const ax=V.dense?[V3(1,0,0),V3(.5,0,.866),V3(-.5,0,.866)]:null;
-  (ip.out||[]).forEach((p,i)=>{const m=new THREE.Mesh(geo,mat);m.position.copy(p);if(V.cube){m.scale.setScalar(ip.ext*rnd(.03,.07));m.rotation.set(rnd(0,3),rnd(0,3),rnd(0,3))}else{m.scale.set(ip.ext*(V.dense?.0035:.007),ip.ext*rnd(.25,.55),ip.ext*(V.dense?.0035:.007));m.quaternion.setFromUnitVectors(V3(0,1,0),ax?ax[i%3]:V3(rnd(-1,1),rnd(-1,1),rnd(-1,1)).normalize())}host.add(m)})}
+ if(V.ndl||V.cube)addNeedles(host,V,true);
  if(V.ph){const pm=cmat({col:LC(V.ph),op:.6,rough:.05});pm.userData.incl=1;const m=new THREE.Mesh(host.geometry,pm);m.scale.setScalar(.55);m.renderOrder=1;host.add(m)}
  if(V.host){const c2=BUILD[id]().o;const w=new THREE.Group();w.add(c2);w.updateMatrixWorld(true);const bb=new THREE.Box3().setFromObject(w),cc=new THREE.Vector3(),sz=new THREE.Vector3();bb.getCenter(cc);bb.getSize(sz);c2.position.sub(cc);w.scale.setScalar(ext*.42/Math.max(sz.x,sz.y,sz.z,1e-3));w.rotation.set(rnd(-.4,.4),rnd(0,TAU),rnd(-.4,.4));w.traverse(q=>{if(q.isMesh)(Array.isArray(q.material)?q.material:[q.material]).forEach(m=>{m.userData.incl=1})});host.add(w)}
- if(V.rock!=null&&!V.host){}}
+}
 function applyVar(inner,r,id,spec){const V=varOf(spec);if(!V)return;const o=r.o;
  if(V.shp)o.scale.multiply(V3(V.shp[0],V.shp[1],V.shp[2]));
  const mm=mainMats(o);mm.forEach(m=>{const u=m.uniforms;if(V.col!=null)u.uCol.value=LC(V.col);if(V.op!=null)u.uOp.value=Math.min(u.uOp.value,V.op);if(V.glow!=null)u.uGlow.value=LC(V.glow).multiplyScalar(1.3);if(V.irid&&u.uIrid)u.uIrid.value=V.irid});
  inner.updateMatrixWorld(true);const bb=new THREE.Box3().setFromObject(o),c=new THREE.Vector3(),sz=new THREE.Vector3();bb.getCenter(c);bb.getSize(sz);const bot=V3(c.x,bb.min.y,c.z),hh=sz.y,ww=Math.max(sz.x,sz.z);
  const wrap=(obj,piv)=>{const g=new THREE.Group();g.position.copy(piv);obj.position.sub(piv);g.add(obj);inner.add(g);return g};
- const cl=()=>{const k=o.clone(true);return k};
+ const cl=()=>o.clone(true);
  if(V.tw){inner.remove(o);const A=wrap(o,bot.clone()),B=wrap(cl(),bot.clone());const a=V.tw*Math.PI/180/2;A.rotation.z=-a;B.rotation.z=a;B.rotation.y=Math.PI*.15}
  else if(V.pen){const B=wrap(cl(),c.clone());B.quaternion.setFromAxisAngle(V3(V.pen[0],V.pen[1],V.pen[2]).normalize(),V.pen[3]*Math.PI/180)}
  if(V.scep){const k=cl(),W=new THREE.Group();W.position.set(c.x,bb.max.y-hh*.14,c.z);k.position.sub(bot);W.add(k);W.scale.set(1.35,.42,1.35);inner.add(W)}
  if(V.clus){for(let i=0;i<V.clus;i++){const k=cl(),W=new THREE.Group(),a=i/V.clus*TAU+rnd(-.4,.4),d=ww*rnd(.35,.7);W.position.set(c.x+Math.cos(a)*d,bb.min.y,c.z+Math.sin(a)*d);k.position.sub(bot);W.add(k);W.scale.setScalar(rnd(.4,.72));W.rotation.set(Math.sin(a)*rnd(.2,.6),rnd(0,TAU),-Math.cos(a)*rnd(.2,.6));inner.add(W)}}
  if(V.ph){const k=cl();k.traverse(q=>{if(q.isMesh)q.material=Array.isArray(q.material)?q.material.map(x=>x.clone()):q.material.clone()});mainMats(k).forEach(m=>{m.uniforms.uCol.value=LC(V.ph);m.uniforms.uOp.value=Math.max(m.uniforms.uOp.value,.55)});const W=wrap(k,c.clone());W.scale.setScalar(.6);k.position.y-=hh*.05}
- if(V.ndl||V.cube){let host=null;o.traverse(q=>{if(!host&&q.isMesh&&q.geometry.userData&&q.geometry.userData.planes)host=q});if(host){const ip=insidePts(host.geometry,V.dense?40:V.cube?7:16,.82);const mat=cmat({metal:1,col:LC(V.ndl||V.cube),rough:V.cube?.12:.3});mat.userData.incl=1;
-   const geo=V.cube?ensureAttrs(new THREE.BoxGeometry(1,1,1)):ensureAttrs(new THREE.CylinderGeometry(1,1,1,5));const ax=V.dense?[V3(1,0,0),V3(.5,0,.866),V3(-.5,0,.866)]:null;
-   (ip.out||[]).forEach((p,i)=>{const m=new THREE.Mesh(geo,mat);m.position.copy(p);if(V.cube){const k=ip.ext*rnd(.03,.07);m.scale.setScalar(k);m.rotation.set(rnd(0,3),rnd(0,3),rnd(0,3))}else{m.scale.set(ip.ext*(V.dense?.0035:.007),ip.ext*rnd(.25,.6),ip.ext*(V.dense?.0035:.007));m.quaternion.setFromUnitVectors(V3(0,1,0),ax?ax[i%3]:V3(rnd(-1,1),rnd(-1,1),rnd(-1,1)).normalize())}host.add(m)})}}
+ if(V.ndl||V.cube){let host=null;o.traverse(q=>{if(!host&&q.isMesh&&q.geometry.userData&&q.geometry.userData.planes)host=q});if(host)addNeedles(host,V,false)}
  if(V.host){const R0=ww*.72,H0=hh*.62,P=[];for(let i=0;i<6;i++){const a=i/6*TAU;P.push({n:[Math.cos(a),0,Math.sin(a)],d:R0})}
   if(V.host==='q'){for(let i=0;i<6;i++){const a=i/6*TAU,n=V3(Math.cos(a)*.78,1,Math.sin(a)*.78).normalize();P.push({n:[n.x,n.y,n.z],d:n.y*(H0+R0*.95)})}P.push({n:[0,-1,0],d:H0})}
   const geo=polyGeo(P,{noDmg:true}),sh=gem(geo,{col:LC(0xf6f7f8),op:.1,rough:.015,disp:.25});sh.position.copy(c);sh.traverse(q=>{if(q.isMesh){q.renderOrder+=4;(Array.isArray(q.material)?q.material:[q.material]).forEach(m=>m.userData.shell=1)}});inner.add(sh)}
@@ -1071,65 +1077,6 @@ function pickaxe(parent,x,y,z,ry,lean){const g=new THREE.Group();g.position.set(
  const hd=new THREE.Mesh(new THREE.BoxGeometry(.5,.05,.05),hqMat('iron'));hd.position.y=.98;g.add(hd);for(const s of[-1,1]){const tip=new THREE.Mesh(new THREE.ConeGeometry(.03,.14,6),hqMat('iron'));tip.rotation.z=-s*Math.PI/2;tip.position.set(s*.31,.98,0);g.add(tip)}return g}
 function shovel(parent,x,y,z,ry,lean){const g=new THREE.Group();g.position.set(x,y,z);g.rotation.set(0,ry,lean);parent.add(g);const h=new THREE.Mesh(new THREE.CylinderGeometry(.022,.026,1.1,8),hqMat('plankG'));h.position.y=.75;g.add(h);
  const bl=new THREE.Mesh(new THREE.SphereGeometry(.16,12,8,0,TAU,0,.9),hqMat('rust'));bl.scale.set(1,1.5,.35);bl.rotation.x=Math.PI;bl.position.y=.16;g.add(bl);const gr=new THREE.Mesh(new THREE.TorusGeometry(.06,.012,6,12),hqMat('iron'));gr.position.y=1.33;g.add(gr);return g}
-function woodpile(parent,x,y,z,ry){const g=new THREE.Group();g.position.set(x,y,z);g.rotation.y=ry;parent.add(g);const mats=[hqMat('bark'),hqMat('end'),hqMat('end')];
- for(let r=0;r<4;r++)for(let i=0;i<6-r%2;i++){const m=new THREE.Mesh(new THREE.CylinderGeometry(.07+Math.random()*.03,.08,.75,9),mats);m.rotation.x=Math.PI/2;m.rotation.y=(Math.random()-.5)*.08;m.position.set(-.45+i*.18+(r%2)*.09,.09+r*.155,0);m.castShadow=true;g.add(m)}return g}
-// ---------- 통나무 오두막 ----------
-function buildCabin(g){const add=(geo,mat,x,yy,z,rx=0,ry=0,rz=0)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,yy,z);m.rotation.set(rx,ry,rz);m.castShadow=m.receiveShadow=true;g.add(m);return m};
- const bark=hqMat('bark'),end=hqMat('end'),plank=hqMat('plank'),plankV=hqMat('plankV'),plankG=hqMat('plankG'),iron=hqMat('iron'),LM=[bark,end,end];
- const LR=.19,HW=2.3,HD=2.8,ST=LR*1.9;
- add(new THREE.BoxGeometry(5.5,1.6,6.5),hqMat('stone'),0,-.55,0);
- const chink=new THREE.MeshStandardMaterial({color:LC(0xa89c88),roughness:1});
- const log=(len,x,yy,z,ax)=>{const r=LR*(1+(Math.random()-.5)*.08),m=add(new THREE.CylinderGeometry(r,r*1.02,len,20,1),LM,x,yy,z,ax==='z'?Math.PI/2:0,Math.random()*TAU*0,ax==='x'?Math.PI/2:0);if(ax==='z')m.rotation.y=0;m.rotateY(Math.random()*TAU);return m};
- for(let r=0;r<8;r++){const yy=.4+r*ST,o=r%2?.1:0;
-  log(2*HD+.7,-HW,yy+o,0,'z');
-  if(r<6){log(2.25,HW,yy+o,-1.75,'z');log(2.25,HW,yy+o,1.75,'z')}else log(2*HD+.7,HW,yy+o,0,'z');
-  log(2*HW+.7,0,yy+LR*.95+o,-HD,'x');log(2*HW+.7,0,yy+LR*.95+o,HD,'x');
-  add(new THREE.BoxGeometry(.22,.12,2*HD-.2),chink,-HW+.02,yy+o+LR*.95,0);add(new THREE.BoxGeometry(2*HW-.2,.12,.22),chink,0,yy+o+LR*1.9,-HD+.02);add(new THREE.BoxGeometry(2*HW-.2,.12,.22),chink,0,yy+o+LR*1.9,HD-.02)}
- const top=.4+8*ST;
- // 문
- const dg=new THREE.Group();dg.position.set(HW+.02,0,0);g.add(dg);const dadd=(geo,mat,x,yy,z)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,yy,z);m.castShadow=m.receiveShadow=true;dg.add(m);return m};
- dadd(new THREE.BoxGeometry(.1,2.2,1.15),plankV,0,1.4,0);for(const zz of[-.62,.62])dadd(new THREE.BoxGeometry(.22,2.45,.14),plankG,.04,1.42,zz);dadd(new THREE.BoxGeometry(.24,.16,1.4),plankG,.05,2.6,0);
- for(const yy of[.75,2.05])dadd(new THREE.BoxGeometry(.04,.14,1.05),plankG,.07,yy,0);{const br=dadd(new THREE.BoxGeometry(.04,.12,1.45),plankG,.07,1.4,0);br.rotation.x=.98}
- for(const yy of[.75,2.05]){dadd(new THREE.BoxGeometry(.02,.06,.55),iron,.1,yy,-.3)}const ring=new THREE.Mesh(new THREE.TorusGeometry(.06,.012,8,16),hqMat('brass'));ring.position.set(.12,1.35,.38);ring.rotation.y=Math.PI/2;dg.add(ring);
- dadd(new THREE.BoxGeometry(.5,.06,1.2),plankG,.3,.3,0);
- // 창문
- const win=(x,yy,z,ry)=>{const w=new THREE.Group();w.position.set(x,yy,z);w.rotation.y=ry;g.add(w);const wa=(geo,mat,a,b,c)=>{const m=new THREE.Mesh(geo,mat);m.position.set(a,b,c);m.castShadow=true;w.add(m);return m};
-  wa(new THREE.PlaneGeometry(.95,.8),hqMat('window'),0,0,.02);for(const sx of[-1,1])wa(new THREE.BoxGeometry(.1,1,.14),plankG,sx*.52,0,.06);for(const sy of[-1,1])wa(new THREE.BoxGeometry(1.15,.1,.14),plankG,0,sy*.45,.06);
-  wa(new THREE.BoxGeometry(.04,.8,.05),plankG,0,0,.05);wa(new THREE.BoxGeometry(.95,.04,.05),plankG,0,0,.05);wa(new THREE.BoxGeometry(1.3,.07,.3),plankG,0,-.53,.14);
-  for(const sx of[-1,1]){const sh=wa(new THREE.BoxGeometry(.5,.95,.05),plankV,sx*.86,0,.09);sh.rotation.y=sx*.25}
-  const fb=wa(new THREE.BoxGeometry(1.1,.22,.26),plank,0,-.7,.22);for(let i=0;i<9;i++){const f=new THREE.Mesh(new THREE.SphereGeometry(.05,6,5),new THREE.MeshStandardMaterial({color:LC([0xe0556a,0xf0d050,0xf4f0f0,0x9a6ad0][i%4]),roughness:.7}));f.position.set(-.45+i*.11,-.52+Math.random()*.06,.22+Math.random()*.06);w.add(f);const l=new THREE.Mesh(new THREE.ConeGeometry(.04,.14,5),M(0x4d7a34));l.position.set(-.45+i*.11+.03,-.6,.24);w.add(l)}};
- win(0,1.75,HD+LR+.02,0);win(-.6,1.75,-HD-LR-.02,Math.PI);win(-HW-LR-.02,1.75,1.3,-Math.PI/2);
- // 지붕
- const RL=2*HD+1.2,rw=3.55,ang=.6;
- for(const s of[-1,1]){const r=add(new THREE.BoxGeometry(rw,.12,RL),hqMat('shingle'),s*1.42,top+.98,0,0,0,-s*ang);
-  const fas=add(new THREE.BoxGeometry(.06,.24,RL),plankG,s*(1.42+Math.cos(ang)*rw/2+.01),top+.98-Math.sin(ang)*rw/2-.06,0,0,0,-s*ang);
-  for(let i=0;i<9;i++){const t=add(new THREE.BoxGeometry(.5,.12,.1),plankG,s*(2.75),top-.05,-RL/2+.3+i*(RL-.6)/8,0,0,-s*ang)}}
- const ridge=add(new THREE.CylinderGeometry(.11,.11,RL+.05,10),bark,0,top+1.92,0,Math.PI/2);
- const tri=new THREE.Shape();tri.moveTo(-2.6,0);tri.lineTo(2.6,0);tri.lineTo(0,1.85);tri.closePath();const tg=new THREE.ShapeGeometry(tri);{const uv=tg.attributes.uv,p=tg.attributes.position;for(let i=0;i<uv.count;i++)uv.setXY(i,p.getX(i)*.3,p.getY(i)*.3)}
- add(tg,plankV,0,top,HD+.12);add(tg,plankV,0,top,-HD-.12,0,Math.PI);
- for(const zz of[HD+.6,-HD-.6])for(const s of[-1,1]){const b=add(new THREE.BoxGeometry(3.6,.1,.08),plankG,s*1.42,top+.86,zz,0,0,-s*ang)}
- // 굴뚝
- const chH=top+3.2;add(new THREE.BoxGeometry(1,chH,1.1),hqMat('stoneC'),-HW-.55,chH/2-.2,-1.2);add(new THREE.BoxGeometry(1.2,.14,1.3),hqMat('stone'),-HW-.55,chH-.15,-1.2);
- const flue=add(new THREE.CylinderGeometry(.16,.18,.4,12),hqMat('rust'),-HW-.55,chH+.1,-1.2);addSmoke(g,new THREE.Vector3(-HW-.55,chH+.35,-1.2),0xc8c4bc,.9);
- // 현관
- for(let i=0;i<13;i++){const b=add(new THREE.BoxGeometry(1.95,.07,.46),plank,HW+1.15,.2,-3+i*.5);b.rotation.y=(Math.random()-.5)*.01}
- add(new THREE.BoxGeometry(.18,.32,6.4),bark,HW+2.1,.05,0);
- for(const zz of[-3.05,3.05,-1.05,1.05]){add(new THREE.CylinderGeometry(.1,.11,2.75,12),LM,HW+1.95,1.55,zz)}
- add(new THREE.BoxGeometry(.24,.24,6.6),bark,HW+1.95,2.95,0);
- const pr=add(new THREE.BoxGeometry(2.6,.1,6.9),hqMat('shingle'),HW+1.15,3.25,0,0,0,-.28);
- for(const zz of[-3.05,3.05]){add(new THREE.BoxGeometry(1.75,.09,.09),plankG,HW+1.1,1.05,zz);for(let i=0;i<6;i++)add(new THREE.BoxGeometry(.05,.75,.05),plankG,HW+.35+i*.3,.62,zz)}
- for(let i=0;i<2;i++)add(new THREE.BoxGeometry(.4,.1,1.4),plank,HW+2.35+i*.32,.1-i*.12,0);
- // 간판 · 랜턴
- const sign=new THREE.Group();sign.position.set(HW+1.95,2.45,-1.9);sign.rotation.y=Math.PI/2;g.add(sign);
- const sb=new THREE.Mesh(new THREE.BoxGeometry(1.9,.66,.06),plankG);sb.castShadow=true;sign.add(sb);const sf=new THREE.Mesh(new THREE.PlaneGeometry(1.86,.62),new THREE.MeshStandardMaterial({map:signTex('광물 상점'),roughness:.75}));sf.position.z=.032;sign.add(sf);const sf2=sf.clone();sf2.position.z=-.032;sf2.rotation.y=Math.PI;sign.add(sf2);
- for(const sx of[-.75,.75])ropeBetween(sign,new THREE.Vector3(sx,.33,0),new THREE.Vector3(sx,.5,0),.01);
- const big=new THREE.Group();big.position.set(HW+.32,3.05,0);big.rotation.y=Math.PI/2;g.add(big);const bb=new THREE.Mesh(new THREE.BoxGeometry(2.7,.8,.08),plankG);big.add(bb);const bf=new THREE.Mesh(new THREE.PlaneGeometry(2.62,.74),new THREE.MeshStandardMaterial({map:signTex('광물 상점'),roughness:.7}));bf.position.z=.042;big.add(bf);
- const arm=add(new THREE.BoxGeometry(.5,.05,.05),iron,HW+.25,2.62,.95);lanternMesh(g,HW+.45,2.28,.95,[1.4,8]);ropeBetween(g,new THREE.Vector3(HW+.45,2.6,.95),new THREE.Vector3(HW+.45,2.58,.95),.008);
- // 소품
- barrel(g,HW+1.55,.23,2.35,1);barrel(g,HW+1.05,.23,2.6,.85);crate(g,HW+1.45,.23,-2.3,.85,.75,.85,.3,'광석');crate(g,HW+1.4,.98,-2.35,.6,.5,.6,-.2);
- const bench=new THREE.Group();bench.position.set(HW+.55,.23,-1.2);g.add(bench);{const bt=new THREE.Mesh(new THREE.BoxGeometry(.45,.07,1.3),plank);bt.position.y=.45;bt.castShadow=true;bench.add(bt);for(const zz of[-.55,.55]){const l=new THREE.Mesh(new THREE.BoxGeometry(.4,.45,.07),plankG);l.position.set(0,.22,zz);bench.add(l)}}
- goldPan(g,HW+.27,1.6,-1.25,0);pickaxe(g,HW+.5,.23,1.55,0,-.22);shovel(g,HW+.45,.23,1.8,.4,-.18);woodpile(g,-.3,.25,-HD-.55,0);woodpile(g,-HW-.55,.25,1.0,Math.PI/2);
- return{plankM:plank}}
 // ---------- 원정 캠프 ----------
 function buildCamp(){const g=new THREE.Group(),y=H(SX,SZ);g.position.set(SX,y,SZ);scene.add(g);const cv=hqMat(REG==='cave'?'canvasC':'canvas'),pole=hqMat('plankG');
  const add=(geo,mat,x,yy,z,rx=0,ry=0,rz=0)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,yy,z);m.rotation.set(rx,ry,rz);m.castShadow=m.receiveShadow=true;g.add(m);return m};
@@ -1174,9 +1121,8 @@ function buildCamp(){const g=new THREE.Group(),y=H(SX,SZ);g.position.set(SX,y,SZ
  const lpost=add(new THREE.CylinderGeometry(.03,.035,2.1,8),hqMat('iron'),2.75,1.05,-.55);const hook=add(new THREE.BoxGeometry(.35,.03,.03),hqMat('iron'),2.88,2.05,-.55);lanternMesh(g,3.0,1.72,-.55,[REG==='cave'?2:1,REG==='cave'?14:8]);ropeBetween(g,new THREE.Vector3(3,2.04,-.55),new THREE.Vector3(3,2.02,-.55),.008);
  obst.push({x:SX,z:SZ,r:2.1,top:y+2.4},{x:SX+fx,z:SZ+fz,r:.55,top:y+.5})}
 
-// 상점 (통나무 오두막)
+// 캠프 위치
 const SZ=REG==='quarry'?-58:REG==='cave'?-62:-30,SX=REG==='quarry'?12:REG==='cave'?-6:(()=>{const I=info(cx(SZ),SZ);return cx(SZ)-Math.sign(cxdd(SZ))*(RW+10)/I.s})();
-const shopDoor=REG==='river'?{x:SX+3.6,z:SZ}:{x:SX+2.6,z:SZ+.2};
 if(REG!=='river')buildCamp();else{const g=new THREE.Group(),y=H(SX,SZ);g.position.set(SX,y,SZ);
  const plankM=hqMat('plank');
  // 사금 홈통(슬루스)
@@ -1280,23 +1226,91 @@ if(REG==='river'){const dummy=new THREE.Object3D(),tr=[],bl=[];
  Pm.receiveShadow=true;Pm.castShadow=true;scene.add(Pm)}
 
 // 플레이어: 회전체·캡슐로 이어 붙인 부드러운 몸
-const P=new THREE.Group();scene.add(P);const legs=[],arms=[];
-{const VC=(o={})=>new THREE.MeshStandardMaterial(Object.assign({vertexColors:true,roughness:.85},o));const part=(geo,mat,x,y,z,par=P)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=true;par.add(m);return m};
- const lathe=(pts,seg,colorFn)=>{const g=new THREE.LatheGeometry(pts.map(([r,y])=>new THREE.Vector2(r,y)),seg);if(colorFn){const p=g.attributes.position,col=[];for(let i=0;i<p.count;i++){const c=new THREE.Color(colorFn(p.getY(i)));pushC(col,c.r,c.g,c.b)}g.setAttribute('color',new THREE.Float32BufferAttribute(col,3))}g.computeVertexNormals();return g};
- const capsule=(r1,r2,len,colorFn)=>{const pts=[];for(let i=0;i<=10;i++){const a=-Math.PI/2+i/10*Math.PI/2;pts.push([Math.max(.001,Math.cos(a)*r2),-len+Math.sin(a)*r2])}for(let i=1;i<=10;i++){const a=i/10*Math.PI/2;pts.push([Math.max(.001,Math.cos(a)*r1),Math.sin(a)*r1])}return lathe(pts,22,colorFn)};
- const roundBox=(w,h,d,r)=>{const g=new THREE.BoxGeometry(w,h,d,8,8,8),p=g.attributes.position,n=g.attributes.normal,v=new THREE.Vector3(),c=new THREE.Vector3();for(let i=0;i<p.count;i++){v.set(p.getX(i),p.getY(i),p.getZ(i));c.set(clamp(v.x,-w/2+r,w/2-r),clamp(v.y,-h/2+r,h/2-r),clamp(v.z,-d/2+r,d/2-r));const dd=v.clone().sub(c);if(dd.lengthSq()>1e-8){dd.normalize();v.copy(c).addScaledVector(dd,r);n.setXYZ(i,dd.x,dd.y,dd.z)}p.setXYZ(i,v.x,v.y,v.z)}return g};
- const SKIN=0xd9a47c,SHIRT=0x9c3a2c,PANTS=0x34507a,BOOT=0x3a2a1c,BELT=0x4a3020;
- const body=lathe([[0,.78],[.17,.79],[.24,.84],[.265,.92],[.262,.96],[.255,1.0],[.25,1.06],[.265,1.18],[.29,1.32],[.3,1.42],[.28,1.51],[.2,1.58],[.1,1.63],[.075,1.67],[.072,1.72],[0,1.74]],28,
-  y=>y<.93?PANTS:y<1.0?BELT:y<1.66?SHIRT:SKIN);body.scale(1,1,.78);part(body,VC({roughness:.9}),0,0,0);
- for(const sx of[-.12,.12]){const g=new THREE.Group();g.position.set(sx,.88,0);P.add(g);part(capsule(.11,.09,.7,y=>y<-.6?BOOT:PANTS),VC(),0,0,0,g);part(roundBox(.17,.12,.3,.05),M(BOOT,{roughness:.7}),0,-.76,.05,g);legs.push(g)}
- for(const sx of[-.31,.31]){const g=new THREE.Group();g.position.set(sx,1.46,0);g.rotation.z=sx>0?-.08:.08;P.add(g);part(capsule(.085,.07,.56,y=>y<-.5?SKIN:SHIRT),VC(),0,0,0,g);arms.push(g)}
- part(new THREE.SphereGeometry(.2,32,24),M(SKIN,{roughness:.65}),0,1.86,0);
- part(lathe([[0,1.94],[.43,1.945],[.45,1.96],[.43,1.975],[.26,1.99],[.235,2.05],[.225,2.15],[.18,2.2],[0,2.21]],32),M(0x6a4a2c,{roughness:.85}),0,0,0);
- part(roundBox(.46,.58,.24,.08),M(0x6b6a45,{roughness:.95}),0,1.26,-.33);part(roundBox(.48,.2,.27,.07),M(0x5a5938,{roughness:.95}),0,1.5,-.34);
- const pan=part(lathe([[0,0],[.26,0],[.36,.06],[.39,.085],[.37,.09],[.25,.02],[0,.02]],32),M(0x2c5e34,{roughness:.5}),0,1.24,-.48);pan.rotation.x=-Math.PI/2;
- const sh=new THREE.Group();sh.position.set(0,-.6,0);arms[1].add(sh);
- part(new THREE.CylinderGeometry(.025,.025,1.1,10),M(0x8b6a43),0,0,.4,sh).rotation.x=Math.PI/2;part(roundBox(.24,.03,.3,.012),M(0x9aa0a6,{metalness:.8,roughness:.35}),0,0,.98,sh);
- sh.visible=false;P.userData.shovel=sh}
+const P=new THREE.Group();scene.add(P);const legs=[],arms=[];const PJ={};
+{const part=(geo,mat,x,y,z,par)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;par.add(m);return m};
+ const grp=(par,x,y,z)=>{const g=new THREE.Group();g.position.set(x,y,z);par.add(g);return g};
+ const lathe=(pts,seg=24)=>{const g=new THREE.LatheGeometry(pts.map(([r,y])=>new THREE.Vector2(Math.max(r,.0005),y)),seg);g.computeVertexNormals();return g};
+ // 팔다리: 피벗(관절)에서 아래로 뻗는 근육 윤곽
+ const limb=(len,r0,r1,bul=0,bp=.35,seg=20)=>{const pts=[[0.0005,r0*.6]];for(let i=0;i<=12;i++){const t=i/12,r=r0+(r1-r0)*t+bul*Math.exp(-Math.pow((t-bp)/.22,2));pts.push([r,-t*len])}pts.push([0.0005,-len-r1*.6]);return lathe(pts.map(([r,y])=>[r,y]),seg)};
+ const roundBox=(w,h,d,r)=>{const g=new THREE.BoxGeometry(w,h,d,6,6,6),p=g.attributes.position,v=new THREE.Vector3(),c=new THREE.Vector3();for(let i=0;i<p.count;i++){v.set(p.getX(i),p.getY(i),p.getZ(i));c.set(clamp(v.x,-w/2+r,w/2-r),clamp(v.y,-h/2+r,h/2-r),clamp(v.z,-d/2+r,d/2-r));const dd=v.clone().sub(c);if(dd.lengthSq()>1e-9){dd.normalize();v.copy(c).addScaledVector(dd,r)}p.setXYZ(i,v.x,v.y,v.z)}g.computeVertexNormals();return g};
+ // 절차 텍스처: 플란넬 체크, 데님, 가죽, 캔버스, 피부
+ const ctex=(N,draw,rep)=>{const c=document.createElement('canvas');c.width=c.height=N;const g=c.getContext('2d');draw(g,N);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.encoding=THREE.sRGBEncoding;t.anisotropy=8;if(rep)t.repeat.set(rep[0],rep[1]);return t};
+ const noise=(g,N,a,s=1)=>{const im=g.getImageData(0,0,N,N),d=im.data;for(let i=0;i<d.length;i+=4){const n=(Math.random()-.5)*a;d[i]+=n;d[i+1]+=n*s;d[i+2]+=n*s}g.putImageData(im,0,0)};
+ const plaid=ctex(256,(g,N)=>{g.fillStyle='#7a1f1a';g.fillRect(0,0,N,N);g.globalAlpha=.55;g.fillStyle='#1a1416';for(let k=0;k<N;k+=64){g.fillRect(k+8,0,26,N);g.fillRect(0,k+8,N,26)}g.globalAlpha=.35;g.fillStyle='#d8b070';for(let k=0;k<N;k+=64){g.fillRect(k+46,0,3,N);g.fillRect(0,k+46,N,3)}g.globalAlpha=.12;g.strokeStyle='#000';for(let k=-N;k<N;k+=3){g.beginPath();g.moveTo(k,0);g.lineTo(k+N,N);g.stroke()}g.globalAlpha=1;noise(g,N,18)},[3,2]);
+ const denim=ctex(256,(g,N)=>{g.fillStyle='#2f4a72';g.fillRect(0,0,N,N);g.globalAlpha=.25;for(let k=-N;k<N;k+=2){g.strokeStyle=k%4?'#5f7fae':'#1a2a44';g.beginPath();g.moveTo(k,0);g.lineTo(k+N,N);g.stroke()}g.globalAlpha=.3;g.fillStyle='#8aa0c0';for(let i=0;i<40;i++){g.beginPath();g.ellipse(Math.random()*N,Math.random()*N,6+Math.random()*16,3,0,0,TAU);g.fill()}g.globalAlpha=1;noise(g,N,22)},[2,3]);
+ const leather=ctex(128,(g,N)=>{g.fillStyle='#4a301c';g.fillRect(0,0,N,N);noise(g,N,36,.8);g.globalAlpha=.25;g.strokeStyle='#22140a';for(let i=0;i<30;i++){g.beginPath();const x=Math.random()*N,y=Math.random()*N;g.moveTo(x,y);g.lineTo(x+Math.random()*30-15,y+Math.random()*6-3);g.stroke()}g.globalAlpha=1},[2,2]);
+ const canvasT=ctex(128,(g,N)=>{g.fillStyle='#6f6a48';g.fillRect(0,0,N,N);g.globalAlpha=.3;for(let k=0;k<N;k+=2){g.fillStyle=k%4?'#8a845c':'#4e4a32';g.fillRect(k,0,1,N);g.fillRect(0,k,N,1)}g.globalAlpha=1;noise(g,N,20)},[2,2]);
+ const felt=ctex(128,(g,N)=>{g.fillStyle='#6a4a2c';g.fillRect(0,0,N,N);noise(g,N,26,.9)},[3,3]);
+ const SK=new THREE.MeshStandardMaterial({color:LC(0xd29a74),roughness:.55}),SKD=new THREE.MeshStandardMaterial({color:LC(0xb07a58),roughness:.6});
+ const SHIRT=new THREE.MeshStandardMaterial({map:plaid,roughness:.92}),JEANS=new THREE.MeshStandardMaterial({map:denim,roughness:.95}),BOOT=new THREE.MeshStandardMaterial({map:leather,roughness:.62}),SOLE=new THREE.MeshStandardMaterial({color:LC(0x1c1612),roughness:.9}),
+  CANV=new THREE.MeshStandardMaterial({map:canvasT,roughness:.95}),FELT=new THREE.MeshStandardMaterial({map:felt,roughness:.9}),BELTM=new THREE.MeshStandardMaterial({map:leather,color:LC(0x8a6a50),roughness:.55}),BRASS=new THREE.MeshStandardMaterial({color:LC(0xc9a24a),roughness:.3,metalness:1}),
+  HAIR=new THREE.MeshStandardMaterial({color:LC(0x3a2618),roughness:.8}),EYEW=new THREE.MeshStandardMaterial({color:LC(0xf2ece4),roughness:.3}),IRIS=new THREE.MeshStandardMaterial({color:LC(0x3a2a1a),roughness:.15}),BAND=new THREE.MeshStandardMaterial({color:LC(0xb02a24),roughness:.85}),GLOVE=new THREE.MeshStandardMaterial({map:leather,color:LC(0xc8a070),roughness:.75});
+ // 골반 · 허리
+ const hips=grp(P,0,.96,0);PJ.hips=hips;
+ const pelvis=part(lathe([[.0005,-.1],[.12,-.1],[.155,-.06],[.165,0],[.158,.07],[.15,.1],[.0005,.1]],26),JEANS,0,0,0,hips);pelvis.scale.set(1,1,.72);
+ const belt=part(new THREE.CylinderGeometry(.158,.158,.05,26,1,true),BELTM,0,.075,0,hips);belt.scale.set(1,1,.74);belt.material=BELTM.clone();belt.material.side=THREE.DoubleSide;
+ part(roundBox(.06,.045,.015,.006),BRASS,0,.075,.118,hips);
+ // 상체
+ const torso=grp(hips,0,.09,0);PJ.torso=torso;
+ const chest=part(lathe([[.0005,0],[.15,0],[.152,.08],[.16,.18],[.178,.3],[.188,.38],[.178,.44],[.14,.49],[.07,.52],[.0005,.525]],28),SHIRT,0,0,0,torso);chest.scale.set(1,1,.66);
+ for(const sx of[-1,1]){const pk=part(roundBox(.075,.08,.012,.008),SHIRT,sx*.075,.33,.118,torso);pk.rotation.x=-.12;part(new THREE.SphereGeometry(.007,6,4),BRASS,sx*.075,.37,.124,torso)}
+ for(let i=0;i<5;i++)part(new THREE.SphereGeometry(.006,6,4),new THREE.MeshStandardMaterial({color:LC(0xe8e0d0),roughness:.4}),0,.06+i*.085,.104+Math.sin(i/4*Math.PI)*.012,torso);
+ const scarf=part(lathe([[.062,.47],[.085,.5],[.07,.54],[.055,.545]],20),BAND,0,0,0,torso);scarf.scale.set(1,1,.9);const knot=part(new THREE.ConeGeometry(.045,.09,4),BAND,0,.45,.07,torso);knot.rotation.x=Math.PI;
+ // 목 · 머리
+ const neck=part(limb(.1,.048,.052,0,.5,16),SK,0,.6,0,torso);
+ const head=grp(torso,0,.66,.008);PJ.head=head;
+ const hg=new THREE.SphereGeometry(.105,36,28),hp=hg.attributes.position;for(let i=0;i<hp.count;i++){let x=hp.getX(i),y=hp.getY(i),z=hp.getZ(i);const t=clamp((-y+.02)/.1,0,1);x*=1-t*.22;z*=1-t*.1;if(y<-.03&&z>0)z+=.012*t;if(z>.06&&y>-.02&&y<.03)z+=.006;y*=1.18;hp.setXYZ(i,x,y,z)}hg.computeVertexNormals();
+ part(hg,SK,0,.06,0,head);
+ const jaw=part(new THREE.SphereGeometry(.072,24,16),SKD,0,-.02,.03,head);jaw.scale.set(1.05,.62,1);jaw.material=SKD.clone();jaw.material.transparent=true;jaw.material.opacity=.55;
+ const nose=part(new THREE.ConeGeometry(.018,.05,10),SK,0,.06,.107,head);nose.rotation.x=Math.PI/2+.35;part(new THREE.SphereGeometry(.016,10,8),SK,0,.04,.112,head);
+ for(const sx of[-1,1]){part(new THREE.SphereGeometry(.016,14,10),EYEW,sx*.036,.083,.088,head).scale.set(1,.7,.6);part(new THREE.SphereGeometry(.0085,10,8),IRIS,sx*.036,.083,.0975,head);
+  const br=part(roundBox(.04,.008,.01,.003),HAIR,sx*.037,.105,.098,head);br.rotation.z=sx*-.12;
+  const ear=part(new THREE.SphereGeometry(.024,12,10),SK,sx*.103,.065,-.005,head);ear.scale.set(.4,1,.75)}
+ part(roundBox(.04,.006,.01,.003),new THREE.MeshStandardMaterial({color:LC(0x8a4a3a),roughness:.5}),0,.012,.1,head);
+ const mus=part(roundBox(.06,.012,.014,.006),HAIR,0,.026,.104,head);
+ const hair=part(new THREE.SphereGeometry(.112,28,16,0,TAU,0,Math.PI*.55),HAIR,0,.075,-.008,head);hair.scale.set(1,1.05,1.05);
+ // 카우보이풍 펠트 모자
+ const hat=grp(head,0,.155,-.005);PJ.hat=hat;
+ const brim=part(lathe([[.0005,0],[.2,0],[.22,.012],[.215,.022],[.2,.016],[.0005,.016]],40),FELT,0,0,0,hat);brim.scale.set(1,1,.92);
+ const cg=lathe([[.0005,0],[.118,0],[.12,.05],[.112,.1],[.095,.125],[.0005,.118]],32),cp=cg.attributes.position;for(let i=0;i<cp.count;i++){const x=cp.getX(i),y=cp.getY(i),z=cp.getZ(i);if(y>.09){cp.setY(i,y-.025*Math.exp(-x*x/.002))}cp.setZ(i,z*(1-.12*Math.max(0,y-.06)/.06*(1-Math.abs(x)/.12)))}cg.computeVertexNormals();part(cg,FELT,0,.01,0,hat);
+ part(new THREE.CylinderGeometry(.121,.121,.022,32,1,true),new THREE.MeshStandardMaterial({color:LC(0x2a1c14),roughness:.6,side:THREE.DoubleSide}),0,.025,0,hat);
+ // 다리
+ for(const sx of[-1,1]){const th=grp(hips,sx*.088,-.04,0);const thigh=part(limb(.44,.085,.058,.012,.25),JEANS,0,0,0,th);
+  const kn=grp(th,0,-.44,0);part(limb(.42,.058,.044,.014,.3),JEANS,0,0,0,kn);
+  const ft=grp(kn,0,-.42,0);part(new THREE.CylinderGeometry(.05,.046,.14,16),BOOT,0,.03,0,ft);
+  const bt=part(roundBox(.1,.075,.24,.035),BOOT,0,-.04,.045,ft);part(roundBox(.105,.025,.25,.01),SOLE,0,-.078,.045,ft);part(roundBox(.1,.03,.06,.01),SOLE,0,-.07,-.05,ft);
+  for(let i=0;i<4;i++)part(new THREE.BoxGeometry(.04,.004,.006),new THREE.MeshStandardMaterial({color:LC(0xc8b890),roughness:.8}),0,.0-i*.02,.05+i*.022,ft).rotation.x=-.7;
+  legs.push(th);(PJ.knee=PJ.knee||[]).push(kn);(PJ.foot=PJ.foot||[]).push(ft)}
+ // 팔
+ for(const sx of[-1,1]){const sh=grp(torso,sx*.205,.43,0);part(new THREE.SphereGeometry(.062,18,14),SHIRT,0,0,0,sh).scale.set(1,.9,.9);
+  const ua=grp(sh,0,0,0);ua.rotation.z=sx*.1;part(limb(.3,.056,.045,.01,.35),SHIRT,0,0,0,ua);
+  const el=grp(ua,0,-.3,0);part(limb(.12,.046,.044,0,.5),SHIRT,0,0,0,el);part(new THREE.CylinderGeometry(.047,.047,.03,16),SHIRT,0,-.12,0,el);part(limb(.27,.04,.032,.006,.3),SK,0,-.1,0,el);
+  const hd=grp(el,0,-.37,0);part(roundBox(.06,.085,.03,.014),GLOVE,0,-.035,0,hd);part(roundBox(.022,.04,.022,.009),GLOVE,sx*-.03,-.02,.014,hd).rotation.z=sx*.5;
+  for(let f=0;f<4;f++)part(roundBox(.013,.04,.017,.006),GLOVE,-.021+f*.014,-.092,.004,hd).rotation.x=.25;
+  arms.push(ua);(PJ.elbow=PJ.elbow||[]).push(el);(PJ.hand=PJ.hand||[]).push(hd)}
+ // 배낭 · 침낭 · 패닝 접시
+ const pack=grp(torso,0,.27,-.17);part(roundBox(.3,.38,.15,.05),CANV,0,0,0,pack);part(roundBox(.31,.13,.16,.04),CANV,0,.15,.005,pack);part(roundBox(.2,.12,.05,.02),CANV,0,-.08,-.09,pack);
+ for(const sx of[-1,1]){part(roundBox(.04,.4,.012,.005),BELTM,sx*.09,.02,.085,pack);part(roundBox(.03,.012,.03,.004),BRASS,sx*.09,.1,-.09,pack)}
+ for(const sx of[-1,1]){const st=part(new THREE.TorusGeometry(.12,.012,6,20,Math.PI),BELTM,sx*.1,.2,.0,torso);st.rotation.y=Math.PI/2;st.scale.set(1,1.4,.9)}
+ const roll=part(new THREE.CylinderGeometry(.065,.065,.36,18),new THREE.MeshStandardMaterial({color:LC(0x4a5a3a),roughness:.95}),0,.25,-.01,pack);roll.rotation.z=Math.PI/2;
+ const pan=part(lathe([[0,0],[.16,0],[.22,.04],[.24,.055],[.23,.06],[.15,.015],[0,.015]],32),new THREE.MeshStandardMaterial({color:LC(0x2c5e34),roughness:.5}),0,-.02,-.09,pack);pan.rotation.x=-Math.PI/2;
+ // 삽 (오른손)
+ const shv=new THREE.Group();shv.position.set(0,-.06,0);PJ.hand[1].add(shv);
+ part(new THREE.CylinderGeometry(.016,.018,1.05,10),new THREE.MeshStandardMaterial({color:LC(0x8b6a43),roughness:.8}),0,0,.38,shv).rotation.x=Math.PI/2;
+ part(new THREE.TorusGeometry(.045,.01,6,14),new THREE.MeshStandardMaterial({color:LC(0x8b6a43),roughness:.8}),0,0,-.16,shv).rotation.y=Math.PI/2;
+ const bl=part(new THREE.SphereGeometry(.14,16,10,0,TAU,0,.85),new THREE.MeshStandardMaterial({color:LC(0x8a9096),metalness:.75,roughness:.38,side:THREE.DoubleSide}),0,0,.96,shv);bl.scale.set(1,.22,1.3);bl.rotation.x=-Math.PI/2;
+ shv.visible=false;P.userData.shovel=shv}
+// 걷기 · 숨쉬기 애니메이션
+let breathT=0;
+function animPlayer(dt,mv){const a=clamp(mv*1.6,0,1),ph=pl.walk;breathT+=dt;
+ const sL=Math.sin(ph),sR=Math.sin(ph+Math.PI);
+ legs[0].rotation.x=-sL*.55*a;legs[1].rotation.x=-sR*.55*a;
+ PJ.knee[0].rotation.x=(Math.max(0,Math.sin(ph-1.3))*.95+.06)*a+.04;PJ.knee[1].rotation.x=(Math.max(0,Math.sin(ph+Math.PI-1.3))*.95+.06)*a+.04;
+ PJ.foot[0].rotation.x=-legs[0].rotation.x*.4-PJ.knee[0].rotation.x*.3;PJ.foot[1].rotation.x=-legs[1].rotation.x*.4-PJ.knee[1].rotation.x*.3;
+ if(!busy){arms[0].rotation.x=sL*.42*a;arms[1].rotation.x=sR*.42*a;PJ.elbow[0].rotation.x=-.18-.25*a*Math.max(0,-sL);PJ.elbow[1].rotation.x=-.18-.25*a*Math.max(0,-sR)}
+ else{PJ.elbow[0].rotation.x=-.6;PJ.elbow[1].rotation.x=-.45}
+ PJ.hips.position.y=.96-.025*a+Math.abs(Math.cos(ph))*.03*a;PJ.hips.rotation.y=sL*.06*a;PJ.torso.rotation.y=-sL*.1*a;PJ.torso.rotation.x=.05*a+(busy?.25:0);
+ const br=Math.sin(breathT*1.6)*.012*(1-a*.6);PJ.torso.scale.set(1+br*.5,1+br*.3,1+br);PJ.head.rotation.x=-.05*a+Math.sin(breathT*.7)*.02-(busy?.25:0);PJ.head.rotation.y=Math.sin(breathT*.31)*.12*(1-a)}
 
 // 자갈 자리
 const spots=[];const TYPES={free:{n:'강가 자갈',base:.45,tip:'어디서든 팔 수 있어요. 광맥 구간이면 훨씬 잘 나와요'},bar:{n:'안쪽 굽이 자갈톱',base:1.3,tip:'물살이 느려지는 안쪽 굽이에 무거운 금이 가라앉아요'},boulder:{n:'큰 바위 뒤 웅덩이',base:1.5,tip:'바위 뒤 소용돌이에서 무거운 알갱이가 떨어져요'},bedrock:{n:'기반암 틈',base:2.2,tip:'금은 단단한 기반암 틈에 끼어 오래 남아요'},sand:{n:'강변 모래톱',base:.6,tip:'가벼운 모래가 많아 함량은 낮은 편'}};
@@ -1336,7 +1350,6 @@ const ZONES=[];
  ZONES.forEach(Z=>{const t=ZM[Z.type].tint;for(let i=0;i<170;i++){const a=rnd(0,TAU),rr=Math.sqrt(Math.random())*Z.r,x=Z.x+Math.cos(a)*rr,z=Z.z+Math.sin(a)*rr,h=H(x,z);if(h>1.5)continue;const s=rnd(.05,.16);dummy.position.set(x,h-s*.2,z);csAdd(x,z,s*1.05);dummy.scale.set(s,s*rnd(.4,.7),s);dummy.rotation.y=rnd(0,TAU);dummy.updateMatrix();Pm.setMatrixAt(n,dummy.matrix);c.setRGB(t[0]*rnd(.8,1.5),t[1]*rnd(.8,1.5),t[2]*rnd(.8,1.5));Pm.setColorAt(n++,c)}});
  Pm.count=n;Pm.receiveShadow=true;Pm.castShadow=true;scene.add(Pm)}
 csBuild();
-scene.traverse(o=>{if(o.isInstancedMesh)o.frustumCulled=false});
 function zoneAt(x,z){let best=null,bs=0;for(const Z of ZONES){const d=Math.hypot(x-Z.x,z-Z.z),s=1-sstep(Z.r*.35,Z.r,d);if(s>bs){bs=s;best=Z}}return best?{zone:best.type,zs:+bs.toFixed(2)}:{zone:null,zs:0}}
 const canDig=(x,z)=>{const h=H(x,z);return h<2.2&&WL-h<.75&&obst.every(o=>Math.hypot(o.x-x,o.z-z)>o.r+.5)};
 const holes=[];
@@ -1370,7 +1383,7 @@ function makeSpec(k,o={}){const [a,b,,,kind]=SPX[k];const R0=Math.random;S.nid=(
  if(k==='quartz'&&R0()<.07)sp.tags.push('rut');if(k==='staurolite'&&R0()<.3)sp.tags.push('x90');if(k==='pyriteCube'&&R0()<.18)sp.tags.push('tri');
  return specFrom(k,sp)}
 function demoSpec(k){const [a,b,,,kind]=SPX[k];return specFrom(k,{id:0,demo:1,seed:4242,mm:+Math.sqrt(a*b).toFixed(2),q:.88,imp:.06,ci:.7,pur:kind==='a'?.9:undefined,n:kind==='b'?40:1,tags:[],dirt:0,stain:0,mix:0})}
-function specValue(sp){const VV=varOf(sp),vm=VV?VV.v:1;const [a,b,f,,kind]=SPX[sp.k],base=IT[sp.k].v,med=a*Math.pow(b/a,.308),BIG=sp.tags.includes('big'),mmE=BIG?Math.min(sp.mm,b*1.25):sp.mm,r=mmE/med;let v;
+function specValue(sp){if(sp.ext)return sp.xv;const VV=varOf(sp),vm=VV?VV.v:1;const [a,b,f,,kind]=SPX[sp.k],base=IT[sp.k].v,med=a*Math.pow(b/a,.308),BIG=sp.tags.includes('big'),mmE=BIG?Math.min(sp.mm,b*1.25):sp.mm,r=mmE/med;let v;
  if(sp.cut)return Math.max(1,Math.round(sp.cut.v0*Math.pow(sp.cut.y,.5)*sp.cut.m*(.35+.65*(sp.cut.pol==null?1:sp.cut.pol))));
  const cl=(1-.45*(sp.dirt||0))*(1-.3*(sp.stain||0));
  if(kind==='b')return Math.max(1,Math.round(base*sp.n*(1-.5*(sp.mix||0))*cl*vm));
@@ -1385,7 +1398,7 @@ const fmtL=mm=>mm>=1000?(mm/1000).toFixed(2)+' m':mm<1?mm.toFixed(2)+' mm':mm<10
 const grade=q=>q>=.85?'A':q>=.65?'B':q>=.4?'C':'D';
 function qText(s){const g=grade(s.q),gr=SPX[s.k][4]!=='x';return gr?{A:'거의 닳지 않아 면과 모서리가 살아 있음',B:'모서리가 조금 닳음',C:'많이 닳아 둥글어짐',D:'심하게 닳고 깨짐'}[g]:{A:'면이 평평하고 모서리가 날카로운 완전한 결정',B:'작은 흠과 비대칭이 조금 있음',C:'일부가 깨지고 면이 고르지 않음',D:'많이 깨지고 일그러짐'}[g]}
 function impText(s){const i=s.imp,m=METALLIC.has(s.k);if(m)return i<.1?'거의 없음 · 광택이 선명':i<.3?'적음 · 살짝 변색':i<.6?'많음 · 변색이 뚜렷':'매우 많음 · 녹슬고 탁함';return i<.1?'거의 없음 · 맑고 깨끗함':i<.3?'적음 · 작은 포유물 몇 개':i<.6?'많음 · 탁하고 포유물이 보임':'매우 많음 · 흐리고 얼룩짐'}
-function tagText(s){const t=[];{const P=[];if(s.tags.includes('flaw0'))P.push('무결점 (내포물 없음)');else if(s.imp<.03&&SPX[s.k][4]!=='b')P.push('아이 클린 (내포물 거의 없음)');if(s.tags.includes('vivid'))P.push('비비드 컬러');if(s.tags.includes('loc'))P.push('명산지 옛 수집 라벨');if(s.tags.includes('fluo'))P.push('강한 형광');if(SPX[s.k][4]==='x'&&s.q>=.95)P.push('박물관급 결정');if(s.pol!=null&&s.pol>=.99)P.push('거울 광택');if(P.length)t.push('프리미엄: '+P.join(' · ')+(P.length>=3?' (트리플 프리미엄 ×1.5)':''))}{const V=varOf(s);if(V)t.push(`변종: ${V.n}${V.v>=2?' (희귀)':V.v<1?' (흔함)':''}`)}if(s.tags.includes('rut'))t.push('금홍석 바늘이 든 수정 (희귀)');if(s.k==='staurolite')t.push(s.tags.includes('x90')?'직각 십자 쌍정 (드묾)':'60° 비스듬한 쌍정');if(s.tags.includes('tri'))t.push('세 결정이 붙어 자람');const sc=s.tags.filter(x=>x==='scr').length;if(sc)t.push('솔질 흠집 '+sc+'개');if(s.tags.includes('tar'))t.push('산에 표면 변색');if(s.tags.includes('etch'))t.push('산에 녹아 표면이 상함');if(s.tags.includes('big'))t.unshift(`${bigWord(s)} 표본 ★ · 보통 최대 크기의 ${bigX(s).toFixed(bigX(s)<10?1:0)}배`);if(s.cut)t.unshift(`세공한 보석 · ${cutGrade(s.cut.m)} (×${s.cut.m.toFixed(2)}) · 원석 무게의 ${Math.round(s.cut.y*100)}%`);if(s.peb)t.push('자갈 모암에 박힌 채로 캠');if(s.k==='amethyst'||s.k==='sapphire')t.push('색 '+(s.ci>.75?'진함':s.ci>.4?'보통':'옅음'));return t.join(' · ')}
+function tagText(s){if(s.ext)return'다른 게임(탐석)에서 옮겨 온 표본';const t=[];{const P=[];if(s.tags.includes('flaw0'))P.push('무결점 (내포물 없음)');else if(s.imp<.03&&SPX[s.k][4]!=='b')P.push('아이 클린 (내포물 거의 없음)');if(s.tags.includes('vivid'))P.push('비비드 컬러');if(s.tags.includes('loc'))P.push('명산지 옛 수집 라벨');if(s.tags.includes('fluo'))P.push('강한 형광');if(SPX[s.k][4]==='x'&&s.q>=.95)P.push('박물관급 결정');if(s.pol!=null&&s.pol>=.99)P.push('거울 광택');if(P.length)t.push('프리미엄: '+P.join(' · ')+(P.length>=3?' (트리플 프리미엄 ×1.5)':''))}{const V=varOf(s);if(V)t.push(`변종: ${V.n}${V.v>=2?' (희귀)':V.v<1?' (흔함)':''}`)}if(s.tags.includes('rut'))t.push('금홍석 바늘이 든 수정 (희귀)');if(s.k==='staurolite')t.push(s.tags.includes('x90')?'직각 십자 쌍정 (드묾)':'60° 비스듬한 쌍정');if(s.tags.includes('tri'))t.push('세 결정이 붙어 자람');const sc=s.tags.filter(x=>x==='scr').length;if(sc)t.push('솔질 흠집 '+sc+'개');if(s.tags.includes('tar'))t.push('산에 표면 변색');if(s.tags.includes('etch'))t.push('산에 녹아 표면이 상함');if(s.tags.includes('big'))t.unshift(`${bigWord(s)} 표본 ★ · 보통 최대 크기의 ${bigX(s).toFixed(bigX(s)<10?1:0)}배`);if(s.cut)t.unshift(`세공한 보석 · ${cutGrade(s.cut.m)} (×${s.cut.m.toFixed(2)}) · 원석 무게의 ${Math.round(s.cut.y*100)}%`);if(s.peb)t.push('자갈 모암에 박힌 채로 캠');if(s.k==='amethyst'||s.k==='sapphire')t.push('색 '+(s.ci>.75?'진함':s.ci>.4?'보통':'옅음'));return t.join(' · ')}
 function cleanText(s){const d=s.dirt||0,st=s.stain||0,m=s.mix||0;if(SPX[s.k][4]==='b')return`섞인 모래 ${Math.round(m*100)}% · 흙 ${Math.round(d*100)}%${m>.06?' · 고운 금이 섞였을 수 있음':' · 걸러냄'}`;if(d<.03&&st<.03)return'깨끗함';return[d>=.03?`흙 ${Math.round(d*100)}%`:'',st>=.03?`쇳물 얼룩 ${Math.round(st*100)}%`:''].filter(Boolean).join(' · ')}
 const shortTag=s=>{const k=SPX[s.k][4];if(s.cut)return`세공 · ${cutGrade(s.cut.m)}`;return k==='a'?`순도 ${Math.round(s.pur*100)}%`:k==='b'?`${s.n}알`:`결정도 ${grade(s.q)}`};
 if(!S.specs){S.specs=[];if(S.inv){for(const k in S.inv){const n=S.inv[k]|0;if(!n||!SPX[k])continue;if(SPX[k][4]==='b')S.specs.push(makeSpec(k,{n}));else for(let i=0;i<Math.min(n,60);i++)S.specs.push(makeSpec(k))}}delete S.inv;save()}
@@ -1408,10 +1421,6 @@ const ECOL={Au:'#ffc93c',Fe:'#d9682b',S:'#f2e33a',O:'#e8352c',Si:'#e6c79c',Al:'#
 const ERAD={Au:1,Fe:.45,S:.42,O:.3,Si:.36,Al:.38,Zr:.5,Ti:.42,Sn:.48,W:.46,Ca:.48,Os:.9,Mo:.46,F:.3,Pb:.55,Zn:.42,Cu:.9};
 const ENAME={Au:'금',Fe:'철',S:'황',O:'산소',Si:'규소',Al:'알루미늄',Zr:'지르코늄',Ti:'티타늄',Sn:'주석',W:'텅스텐',Ca:'칼슘',Os:'오스뮴',Mo:'몰리브데넘',F:'플루오린',Pb:'납',Zn:'아연',Cu:'구리'};
 const viewer={R:null,on:false,mode:'spec',dist:5.4,idle:0,ptr:new Map(),id:null,list:[],last:null};
-function studioEnv(r){const es=new THREE.Scene();es.add(new THREE.Mesh(new THREE.SphereGeometry(20,32,16),new THREE.ShaderMaterial({side:THREE.BackSide,vertexShader:SKYV,fragmentShader:'varying vec3 vP;void main(){float y=normalize(vP).y;gl_FragColor=vec4(mix(vec3(.03,.035,.04),vec3(.35,.38,.42),smoothstep(-.4,.9,y)),1.);}'})));
- const panel=(w,h,x,y,z,k)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({color:new THREE.Color(k,k*.97,k*.92),side:THREE.DoubleSide}));m.position.set(x,y,z);m.lookAt(0,0,0);es.add(m)};
- panel(9,5,0,13,4,7);panel(3,9,-13,3,5,4);panel(3,9,12,2,-7,3);panel(10,2,0,-2,-14,1.5);
- const pm=new THREE.PMREMGenerator(r),t=pm.fromScene(es,.015).texture;pm.dispose();return t}
 function viewerInit(){if(viewer.R)return;const c=document.createElement('canvas');viewer.canvas=c;
  const r=new THREE.WebGLRenderer({canvas:c,antialias:true,alpha:true});r.setPixelRatio(Math.min(devicePixelRatio,2));r.outputEncoding=THREE.sRGBEncoding;r.toneMapping=THREE.ACESFilmicToneMapping;r.toneMappingExposure=1.1;r.setClearColor(0,0);
  const s=new THREE.Scene();const cm=new THREE.PerspectiveCamera(30,1,.05,100);
@@ -1448,7 +1457,7 @@ function buildStruct(key){const d=STRUCT[key],g=new THREE.Group();let mx=0;d.at.
  return{g,els:Object.keys(by)}}
 function viewerSet(spec,mode){viewerInit();if(viewer.cut&&viewer.cut.s!==spec)viewer.cut=null;CLEAN.uNS.value=0;spotI=0;if(viewer.src==='work'&&!spec.cut)initClean(spec);CLEAN.uWetV.value=0;wk.down=false;CLEANON=viewer.src==='work';partsInit();const id=spec.k;viewer.sel=spec;viewer.id=id;viewer.mode=mode||viewer.mode;if(viewer.mode==='uv'&&!SPEC[id].uv)viewer.mode='spec';CMODE=0;const H0=viewer.holder;while(H0.children.length){const c=H0.children[0];H0.remove(c);disposeObj(c)}
  H0.quaternion.setFromEuler(new THREE.Euler(.32,-.7,0));viewer.idle=0;let leg='';
- if(viewer.mode==='atoms'){const r=buildStruct(SPEC[id].st);H0.add(r.g);viewer.blob.visible=false;leg=r.els.map(e=>`<span><i style="background:${ECOL[e]}"></i>${ENAME[e]} ${e}</span>`).join('')}
+ if(viewer.mode==='atoms'&&!STRUCT[SPEC[id].st])viewer.mode='spec';if(viewer.mode==='atoms'){const r=buildStruct(SPEC[id].st);H0.add(r.g);viewer.blob.visible=false;leg=r.els.map(e=>`<span><i style="background:${ECOL[e]}"></i>${ENAME[e]} ${e}</span>`).join('')}
  else{const m=buildMineral(id,viewer.src==='work'&&spec.d0!=null?Object.assign({},spec,{dirt:spec.d0}):spec);CLEANON=false;H0.add(m);viewer.blob.visible=true;viewer.blob.position.y=-m.userData.h-.05;
   if(viewer.mode==='axes'){const ax=m.userData.ax,a=axesGroup(SPEC[id].ax,1.15*(ax.s||1),ax.dirs);a.quaternion.copy(ax.q);a.position.copy(ax.p);m.userData.inner.add(a)}
   if(viewer.mode==='uv')m.traverse(o=>{if(o.material&&o.material.uniforms&&o.material.uniforms.uUV)o.material.uniforms.uUV.value=1})}
@@ -1456,13 +1465,13 @@ function viewerSet(spec,mode){viewerInit();if(viewer.cut&&viewer.cut.s!==spec)vi
  const lg=$('#vleg');if(lg){lg.innerHTML=leg;lg.style.display=leg?'flex':'none'}
  document.querySelectorAll('.vbar button').forEach(b=>b.classList.toggle('on',b.dataset.mode===viewer.mode));
  document.querySelectorAll('#slist button').forEach(b=>b.classList.toggle('on',b.dataset.spec==spec.id));if(viewer.src==='work'){if(viewer.mode!=='atoms'){sampleSurf();if(sandT(spec))sandInit(spec)}if(sandT(spec)&&viewer.mode!=='atoms')sandApply(spec);workPanel()}else if(sandT(spec))sandApply(spec)
- const sp=SPEC[id],bk=BOOK.find(b=>b.id===IT[id].b),vi=$('#vinfo');
- const kd=SPX[id][4],s=spec;if(vi)vi.innerHTML=`<h4>${IT[id].n}${s.demo?' · 기준 표본':' #'+s.id}</h4><dl><dt>감정가</dt><dd><b style="color:var(--gold)">${fmt(s.v)}</b></dd><dt>상태</dt><dd>${cleanText(s)}</dd><dt>크기</dt><dd>${fmtL(s.mm)}${kd==='b'?' (알갱이 평균)':''}</dd><dt>무게</dt><dd>${fmtW(s.g)}${kd==='b'?` · ${s.n}알`:''}</dd>${kd==='a'?`<dt>순도</dt><dd>${(s.pur*100).toFixed(1)}% · 약 ${Math.round(s.pur*24)}K (나머지는 주로 은)</dd>`:`<dt>불순물</dt><dd>${impText(s)}</dd><dt>${kd==='x'?'결정 완성도':'보존 상태'}</dt><dd>${grade(s.q)} · ${qText(s)}</dd>`}${tagText(s)?`<dt>특징</dt><dd>${tagText(s)}</dd>`:''}<dt>광물</dt><dd>${bk.n} · ${bk.f}</dd><dt>결정계</dt><dd>${sp.sys}</dd><dt>생김새</dt><dd>${sp.hab}</dd><dt>광택</dt><dd>${sp.lus}</dd><dt>비중 · 경도</dt><dd>${bk.sg} · ${bk.h}</dd><dt>보통 크기</dt><dd>${sp.size}</dd><dt>원자 구조</dt><dd>${STINFO[sp.st]}</dd></dl>${s.demo||viewer.src!=='bag'?'':`<div class="bar" style="justify-content:flex-start;margin:0 0 10px"><button class="btn ghost" data-disp="${s.id}">${isDisp(s)?'전시장에서 내리기':'전시장에 올리기'}</button></div>`}<p>${viewer.mode==='uv'?'단파 자외선(254 nm)을 비춘 모습. 회중석은 푸르스름한 흰빛 형광을 냅니다. 산지에서 밤에 자외선 등으로 찾기도 합니다.':viewer.mode==='atoms'?(STRUCT[sp.st].at.length?'단위포(흰 선) 안의 원자 배치입니다. 막대는 이웃 원자 사이의 결합.':'이 광물은 원자 수가 많아 실제 격자 상수로 만든 단위포 모양만 보여 줍니다.'):viewer.mode==='axes'?'결정축을 겹쳐 표시했습니다. 결정면은 이 축에 대해 정해진 각도로 납니다.':bk.t}</p>`}
+ const sp=SPEC[id],bk=BOOK.find(b=>b.id===IT[id].b)||XBOOK[IT[id].b]||{n:IT[id].n,f:'—',sg:'—',h:'—',t:''},vi=$('#vinfo');
+ const kd=SPX[id][4],s=spec;if(vi)vi.innerHTML=`<h4>${IT[id].n}${s.demo?' · 기준 표본':' #'+s.id}</h4><dl><dt>감정가</dt><dd><b style="color:var(--gold)">${fmt(s.v)}</b></dd><dt>상태</dt><dd>${cleanText(s)}</dd><dt>크기</dt><dd>${fmtL(s.mm)}${kd==='b'?' (알갱이 평균)':''}</dd><dt>무게</dt><dd>${fmtW(s.g)}${kd==='b'?` · ${s.n}알`:''}</dd>${kd==='a'?`<dt>순도</dt><dd>${(s.pur*100).toFixed(1)}% · 약 ${Math.round(s.pur*24)}K (나머지는 주로 은)</dd>`:`<dt>불순물</dt><dd>${impText(s)}</dd><dt>${kd==='x'?'결정 완성도':'보존 상태'}</dt><dd>${grade(s.q)} · ${qText(s)}</dd>`}${tagText(s)?`<dt>특징</dt><dd>${tagText(s)}</dd>`:''}<dt>광물</dt><dd>${bk.n} · ${bk.f}</dd><dt>결정계</dt><dd>${sp.sys}</dd><dt>생김새</dt><dd>${sp.hab}</dd><dt>광택</dt><dd>${sp.lus}</dd><dt>비중 · 경도</dt><dd>${bk.sg} · ${bk.h}</dd><dt>보통 크기</dt><dd>${sp.size}</dd><dt>원자 구조</dt><dd>${(STINFO[sp.st]||'—')}</dd></dl>${s.demo||viewer.src!=='bag'?'':`<div class="bar" style="justify-content:flex-start;margin:0 0 10px"><button class="btn ghost" data-disp="${s.id}">${isDisp(s)?'전시장에서 내리기':'전시장에 올리기'}</button><button class="btn ghost xsend" data-xsend="${s.id}">${s.ext==='ts'?'⇄ 탐석으로 돌려보내기':'⇄ 탐석으로 보내기'}</button></div>`}<p>${viewer.mode==='uv'?'단파 자외선(254 nm)을 비춘 모습. 회중석은 푸르스름한 흰빛 형광을 냅니다. 산지에서 밤에 자외선 등으로 찾기도 합니다.':viewer.mode==='atoms'?(STRUCT[sp.st].at.length?'단위포(흰 선) 안의 원자 배치입니다. 막대는 이웃 원자 사이의 결합.':'이 광물은 원자 수가 많아 실제 격자 상수로 만든 단위포 모양만 보여 줍니다.'):viewer.mode==='axes'?'결정축을 겹쳐 표시했습니다. 결정면은 이 축에 대해 정해진 각도로 납니다.':bk.t}</p>`}
 function viewerFrame(dt){const v=viewer;if(!v.R)return;if(v.job)workStep(dt);if(v.src==='work')wToolFrame(dt);v.idle+=dt;if(v.idle>2.5&&!(v.src==='work'&&v.tool!=='rot'))v.holder.rotateOnWorldAxis(new THREE.Vector3(0,1,0),dt*.35);v.cam.position.set(0,v.dist*.22,v.dist);v.cam.lookAt(0,0,0);v.R.render(v.scene,v.cam)}
 function kindsOf(){return viewer.src!=='book'?invKeys():BOOK.filter(b=>S.found[b.id]).map(b=>b.rep)}
 function renderLists(k){viewer.kind=k;$('#klist').innerHTML=kindsOf().map(x=>`<button data-kind="${x}" class="${x===k?'on':''}">${sw(IT[x].c)}${IT[x].n}<small>${viewer.src!=='book'?ofKind(x).length:''}</small></button>`).join('');
  const L=viewer.src!=='book'?ofKind(k).sort((a,b)=>b.v-a.v):[demoSpec(k)];$('#slist').innerHTML=viewer.src!=='book'?L.map(specBtn).join(''):'';viewerSet(viewer.src==='work'&&viewer.sel&&L.includes(viewer.sel)?viewer.sel:L[0])}
-const specBtn=s=>`<button data-spec="${s.id}">#${s.id} · ${viewer.src==='work'?cleanText(s):fmtL(s.mm)+' · '+fmtW(s.g)+' · '+shortTag(s)}${s.tags.some(t=>t!=='scr'&&t!=='tar')?' ★':''}${varOf(s)?` · <b style="color:#e8c260">${varOf(s).n.split(' (')[0]}</b>`:''}${S.soak&&S.soak[s.id]?' · 담가 둠':''}<small>${fmt(s.v)}</small></button>`;
+const specBtn=s=>`<button data-spec="${s.id}">#${s.id} · ${viewer.src==='work'?cleanText(s):fmtL(s.mm)+' · '+fmtW(s.g)+' · '+shortTag(s)}${s.tags.some(t=>t!=='scr'&&t!=='tar')?' ★':''}${varOf(s)?` · <b style="color:#e8c260">${varOf(s).n.split(' (')[0]}</b>`:''}${s.ext==='ts'?' <b class="xbadge">탐석</b>':''}${S.soak&&S.soak[s.id]?' · 담가 둠':''}<small>${fmt(s.v)}</small></button>`;
 function openViewer(src,kind,title,note){viewerInit();viewer.src=src;
  openModal(`<h2>${title}</h2><p>${note}</p><div class="bag"><div><div class="vw" id="vwrap"><div class="vbar"><button data-mode="spec">실물</button><button data-mode="axes">결정 축</button><button data-mode="atoms">원자 구조</button><button data-mode="uv" style="display:none">자외선</button></div><div class="legend" id="vleg" style="display:none"></div><div class="vtip">드래그로 돌리기 · 휠이나 두 손가락으로 확대</div></div></div>
  <div><div class="vinfo" id="vinfo"></div><div class="ilist" id="slist"></div><h3 style="margin-top:12px">종류</h3><div class="ilist" id="klist"></div></div></div>`,true,false,true);
@@ -1520,8 +1529,12 @@ function buildRoom(){const sc=new THREE.Scene();sc.background=new THREE.Color(0x
  const ntex=new THREE.CanvasTexture(nc);ntex.encoding=THREE.sRGBEncoding;add(new THREE.BoxGeometry(.32,.02,.42),[M(0x5b3a26),M(0x5b3a26),new THREE.MeshStandardMaterial({map:ntex,roughness:.9}),M(0x5b3a26),M(0x5b3a26),M(0x5b3a26)],1.85,1.01,-2.05,0,-.25,0);
  // 스탠드 조명
  const lmp=new THREE.Group();lmp.position.set(-.6,1,-2.75);sc.add(lmp);const lmM=M(0x2f4a3a,{metalness:.5,roughness:.35});
- add(lathe([[0,0],[.13,0],[.14,.02],[.06,.05],[.02,.06],[0,.06]]),lmM,0,0,0,0,0,0,lmp);add(new THREE.CylinderGeometry(.012,.012,.7,10),lmM,.08,.38,.1,.35,0,-.2,lmp);add(new THREE.CylinderGeometry(.012,.012,.55,10),lmM,.2,.84,.42,-1.1,0,-.3,lmp);
- const shade=add(lathe([[.03,.0],[.06,-.02],[.13,-.12],[.15,-.17],[.145,-.17],[.125,-.12],[.055,-.025],[.025,-.005]]),new THREE.MeshStandardMaterial({color:LC(0x2f4a3a),metalness:.5,roughness:.35,side:THREE.DoubleSide}),.27,.98,.75,.55,0,-.2,lmp);
+ add(lathe([[0,0],[.13,0],[.14,.02],[.06,.05],[.02,.06],[0,.06]]),lmM,0,0,0,0,0,0,lmp);
+ {const J0=V3(0,.06,0),J1=V3(.06,.66,.14),J2=V3(.2,.98,.5);const rod=(a,b)=>{const d=new THREE.Vector3().subVectors(b,a),m=add(new THREE.CylinderGeometry(.012,.012,a.distanceTo(b),10),lmM,(a.x+b.x)/2,(a.y+b.y)/2,(a.z+b.z)/2,0,0,0,lmp);m.quaternion.setFromUnitVectors(V3(0,1,0),d.normalize());return m};
+  rod(J0,J1);rod(J1,J2);for(const j of[J0,J1,J2])add(new THREE.SphereGeometry(.022,14,10),lmM,j.x,j.y,j.z,0,0,0,lmp);
+  for(const sx of[-1,1]){const sp=new THREE.Vector3(J0.x+sx*.012,J0.y,J0.z),ep=new THREE.Vector3(J1.x+sx*.012,J1.y,J1.z).lerp(J0,.35);const d=new THREE.Vector3().subVectors(ep,sp),m=add(new THREE.CylinderGeometry(.003,.003,sp.distanceTo(ep),5),M(0x8a8a8a,{metalness:.8,roughness:.3}),(sp.x+ep.x)/2,(sp.y+ep.y)/2+.0,(sp.z+ep.z)/2+.015,0,0,0,lmp);m.quaternion.setFromUnitVectors(V3(0,1,0),d.normalize())}
+  var shade=add(lathe([[.03,.0],[.06,-.02],[.13,-.12],[.15,-.17],[.145,-.17],[.125,-.12],[.055,-.025],[.025,-.005]]),new THREE.MeshStandardMaterial({color:LC(0x2f4a3a),metalness:.5,roughness:.35,side:THREE.DoubleSide}),J2.x,J2.y,J2.z,.55,0,-.2,lmp);
+  add(new THREE.CylinderGeometry(.03,.03,.04,12),lmM,J2.x,J2.y+.005,J2.z,.55,0,-.2,lmp)}
  const bulb=new THREE.Mesh(new THREE.SphereGeometry(.04,16,12),new THREE.MeshBasicMaterial({color:new THREE.Color(1.6,1.3,.9),toneMapped:false}));bulb.position.set(0,-.08,0);shade.add(bulb);
  // 선반 (왼쪽 벽)
  for(const y of[1.2,1.75,2.3]){add(new THREE.BoxGeometry(.42,.05,2.6),woodM,-4.25,y,-.6);for(const z of[-1.7,.5])add(new THREE.BoxGeometry(.3,.12,.04),M(0x2b2b2b,{metalness:.6}),-4.38,y-.07,z)}
@@ -1623,7 +1636,7 @@ function renderSortUI(){const t=Math.max(0,Math.ceil(sort.time));$('#stime').tex
 function sortRef(){const rows=[...PMIN,...PROCK].map(k=>{const d=PEB[k];return`<tr data-k="${k}"><td class="pick"><button class="rpick" data-c="${d.rock?'rock':k}" title="${d.rock?'그냥 자갈로 버리기':'이 광물로 분류'}">${d.rock?'버리기':'이거예요'}</button></td><td class="nm">${pname(k)}</td><td class="n">${d.sg}</td><td><i class="stk" style="background:${d.stc}"></i>${d.st}</td><td>${d.kn}</td><td>${d.mag>=1?'강하게 붙음':d.mag?'약하게 붙음':'—'}</td><td>${d.fizz===2?'거품이 남':d.fizz?'흰 줄에서만':'—'}</td><td>${uvName(d.uvL)}</td><td>${uvName(d.uvS)}</td></tr>`}).join('');
  $('#sref').innerHTML=`<div class="srh"><h4>현장 감별표</h4><button class="btn ghost" id="sRefX">닫기</button></div><div class="scroll"><table><thead><tr><th></th><th>이름</th><th>비중</th><th>조흔색</th><th>칼(경도 5.5)</th><th>자석</th><th>묽은 산</th><th>장파 UV</th><th>단파 UV</th></tr></thead><tbody>${rows}</tbody></table></div>`;refMarks()}
 function refElim(p,k){const d=PEB[k],o=p.obs||{};if(o.sg!=null&&Math.abs(d.sg-o.sg)>.3)return'비중';if(o.heft!=null&&(d.sg<o.heft/1.25||d.sg>o.heft/.8))return'무게';if(o.st!=null&&d.st!==o.st)return'조흔색';if(o.kn!=null&&d.kn!==o.kn)return'경도';if(o.fz!=null&&(d.fizz||0)!==o.fz)return'산';return null}
-function refMarks(){const el=$('#sref');if(!el)return;const p=sort.sel;let left=0;el.querySelectorAll('tr[data-k]').forEach(tr=>{const why=p?refElim(p,tr.dataset.k):null;tr.classList.toggle('x',!!why);tr.title=why?`${why} 시험 결과와 맞지 않아요`:'';if(p&&!why)left++;const b=tr.querySelector('.rpick');if(b)b.disabled=!p});const h=el.querySelector('.srh h4');if(h){let c=h.querySelector('.left');if(!c){c=document.createElement('em');c.className='left';h.appendChild(c)}c.textContent=p?` · 자갈 #${p.id} 후보 ${left}개`:' · 자갈을 먼저 집으세요'}}
+function refMarks(){const el=$('#sref');if(!el)return;const p=sort.sel;let left=0;el.querySelectorAll('tr[data-k]').forEach(tr=>{const why=p&&upv('sortx')?refElim(p,tr.dataset.k):null;tr.classList.toggle('x',!!why);tr.title=why?`${why} 시험 결과와 맞지 않아요`:'';if(p&&!why)left++;const b=tr.querySelector('.rpick');if(b)b.disabled=!p});const h=el.querySelector('.srh h4');if(h){let c=h.querySelector('.left');if(!c){c=document.createElement('em');c.className='left';h.appendChild(c)}c.textContent=!upv('sortx')?(p?` · 자갈 #${p.id}`:''):p?` · 자갈 #${p.id} 후보 ${left}개`:' · 자갈을 먼저 집으세요'}}
 function sortPanel(){try{refMarks()}catch(e){}const p=sort.sel,el=$('#spanel');if(!p){el.innerHTML=`<h4>자갈을 집어 보세요</h4>`;return}
  el.innerHTML=`<h4>자갈 #${p.id} <small>약 ${(p.mm/10).toFixed(1)} cm</small></h4><div class="tests"><button data-t="heft">손으로 들어 보기<small>무료</small></button><button data-t="sg">저울로 비중 재기<small>−4초</small></button><button data-t="streak">조흔판에 긋기<small>−2초</small></button><button data-t="knife">칼로 긁기<small>−2초</small></button><button data-t="acid">묽은 산 한 방울<small>−2초</small></button></div><div class="res">${p.res.map(r=>`<div>${r}</div>`).join('')||'<div class="mut">아직 시험하지 않았어요</div>'}</div><h5>무엇일까요?</h5><div class="chips">${sort.ref?'':'<button id="sRef2" class="pri">감별표 열기</button>'}<button data-c="rock" class="rk">그냥 자갈 (버리기)</button></div>`}
 function sortTest(t){const p=sort.sel;if(!p)return;const d=PEB[p.k],V=(p.mm/10)**3*.45;let r='';
@@ -1845,7 +1858,7 @@ function openMenu(){try{mpPush()}catch(e){}const n=S.specs.length,dirty=S.specs.
 function openTravel(){openModal(`<h2>다른 지역으로 떠나기</h2><p>배낭과 표본, 소지금은 그대로 가져가요. 지역마다 지질이 달라서 그곳에서만 나오는 광물이 있어요.</p><div class="menu">${Object.entries(REGIONS).map(([id,r])=>`<button class="mi${id===REG?' pri':''}" data-reg="${id}" ${id===REG?'disabled':''}><b>${r.n}${id===REG?' · 지금 여기':''}</b><small>${r.sub} — ${r.d}</small><small style="margin-top:4px;opacity:.85">여기서만: ${r.ex.map(k=>IT[k]?IT[k].n:k).join(' · ')}</small></button>`).join('')}</div>`,false,false,true)}
 function travelTo(id){if(!REGIONS[id]||id===REG)return;S.region=id;S.autostart=1;save();closeModal();const L=$('#loading');L.textContent=REGIONS[id].n+'(으)로 이동하는 중…';L.style.display='flex';setTimeout(()=>location.reload(),60)}
 // ---------- 시세 ----------
-function trendNow(){const slot=Math.floor(Date.now()/600000),ks=Object.keys(IT).filter(k=>SPX[k]&&SPX[k][4]!=='b');const rr=mulberry(slot*7919+13),out={};for(let i=0;i<3;i++){const k=ks[Math.floor(rr()*ks.length)];out[k]=+(1.4+rr()*1.1).toFixed(2)}const cold=ks[Math.floor(rr()*ks.length)];if(!out[cold])out[cold]=.7;return{m:out,left:600000-Date.now()%600000}}
+let trendC=null;function trendNow(){const slot=Math.floor(Date.now()/600000);if(trendC&&trendC.slot===slot)return{m:trendC.m,left:600000-Date.now()%600000};const ks=Object.keys(IT).filter(k=>SPX[k]&&SPX[k][4]!=='b');const rr=mulberry(slot*7919+13),out={};for(let i=0;i<3;i++){const k=ks[Math.floor(rr()*ks.length)];out[k]=+(1.4+rr()*1.1).toFixed(2)}const cold=ks[Math.floor(rr()*ks.length)];if(!out[cold])out[cold]=.7;trendC={slot,m:out};return{m:out,left:600000-Date.now()%600000}}
 const trendMul=k=>trendNow().m[k]||1;
 const sellVal=x=>x.v*upv('price')*trendMul(x.k);
 function trendHTML(){const T=trendNow();return`<div class="trend"><b>지금의 광물 시세</b> <small>${Math.ceil(T.left/60000)}분 뒤 바뀜</small><div>${Object.entries(T.m).map(([k,m])=>`<span class="tg ${m>1?'up':'dn'}">${sw(IT[k].c)}${IT[k].n} ×${m}</span>`).join('')}</div></div>`}
@@ -1918,6 +1931,65 @@ function askName(){openModal(`<h2>온라인 이름 정하기</h2><p>채팅, 경�
 function openVisit(name,specs){disp.visit={name,specs:specs.map((s,i)=>Object.assign({},s,{id:-(i+1)}))};openDisplay()}
 let mpTickT=0;function mpTick(t){if(!MP_ON)return;if(t-mpTickT>1){mpTickT=t;if(document.getElementById('mpBody')&&MP.tab==='auc'&&!document.activeElement.classList.contains('bidin'))mpRefresh()}}
 
+// ---------- 게임 간 표본 이동 (금빛 여울 ⇄ 탐석) ----------
+const XB64=u8=>{let s='';for(let i=0;i<u8.length;i+=8192)s+=String.fromCharCode.apply(null,u8.subarray(i,i+8192));return btoa(s)};
+const XUB64=t=>{const s=atob(t),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u};
+const XGQ={S:.97,A:.85,B:.65,C:.4,D:.2},XQ2G=q=>q>.95?'S':q>.8?'A':q>.52?'B':q>.26?'C':'D';
+function xInboxTake(key){let a=[];try{a=JSON.parse(localStorage.getItem(key)||'[]')}catch(e){}if(a.length)localStorage.removeItem(key);return a}
+function xInboxPut(key,item){let a=[];try{a=JSON.parse(localStorage.getItem(key)||'[]')}catch(e){}a.push(item);try{localStorage.setItem(key,JSON.stringify(a));return true}catch(e){return false}}
+// 메시 묶음 → 모양 그대로 직렬화 (위치는 16비트, 법선은 8비트로 압축)
+function xVisEncode(THREE,root,matFn){root.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(root.matrixWorld).invert(),bb=new THREE.Box3(),tmp=[],v=new THREE.Vector3();
+ root.traverse(o=>{if(!o.isMesh||!o.geometry||!o.geometry.attributes.position)return;for(let p=o;p;p=p.parent)if(p.visible===false)return;const mt=Array.isArray(o.material)?o.material[0]:o.material;if(!mt||mt.side===THREE.BackSide)return;const m=matFn(mt,o);if(!m)return;
+  const M4=new THREE.Matrix4().multiplyMatrices(inv,o.matrixWorld),N3=new THREE.Matrix3().getNormalMatrix(M4),g=o.geometry,pa=g.attributes.position,na=g.attributes.normal,ca=g.attributes.color;
+  const P=new Float32Array(pa.count*3),Nn=new Int8Array(pa.count*3);for(let i=0;i<pa.count;i++){v.fromBufferAttribute(pa,i).applyMatrix4(M4);P[i*3]=v.x;P[i*3+1]=v.y;P[i*3+2]=v.z;bb.expandByPoint(v);if(na){v.fromBufferAttribute(na,i).applyMatrix3(N3).normalize();Nn[i*3]=Math.round(v.x*127);Nn[i*3+1]=Math.round(v.y*127);Nn[i*3+2]=Math.round(v.z*127)}}
+  let C=null;if(ca&&mt.vertexColors){C=new Uint8Array(pa.count*3);for(let i=0;i<pa.count;i++){C[i*3]=Math.max(0,Math.min(255,ca.getX(i)*255));C[i*3+1]=Math.max(0,Math.min(255,ca.getY(i)*255));C[i*3+2]=Math.max(0,Math.min(255,ca.getZ(i)*255))}}
+  let I=null;if(g.index){const ia=g.index.array;I=pa.count>65535?Uint32Array.from(ia):Uint16Array.from(ia)}
+  tmp.push({P,Nn:na?Nn:null,C,I,m})});
+ if(!tmp.length)return null;const mn=bb.min,sz=bb.getSize(new THREE.Vector3());const S3=[sz.x||1e-6,sz.y||1e-6,sz.z||1e-6],M3=[mn.x,mn.y,mn.z];
+ return{v:1,bb:[mn.x,mn.y,mn.z,bb.max.x,bb.max.y,bb.max.z],parts:tmp.map(t=>{const q=new Int16Array(t.P.length);for(let i=0;i<t.P.length;i++){const a=i%3;q[i]=Math.round((t.P[i]-M3[a])/S3[a]*65535-32768)}
+  return{p:XB64(new Uint8Array(q.buffer)),n:t.Nn?XB64(new Uint8Array(t.Nn.buffer)):null,c:t.C?XB64(t.C):null,i:t.I?XB64(new Uint8Array(t.I.buffer)):null,i32:t.I instanceof Uint32Array?1:0,m:t.m}})}}
+function xVisGeos(THREE,vis){const bb=vis.bb,M3=[bb[0],bb[1],bb[2]],S3=[bb[3]-bb[0]||1e-6,bb[4]-bb[1]||1e-6,bb[5]-bb[2]||1e-6];
+ return vis.parts.map(pt=>{const q=new Int16Array(XUB64(pt.p).buffer),P=new Float32Array(q.length);for(let i=0;i<q.length;i++){const a=i%3;P[i]=M3[a]+(q[i]+32768)/65535*S3[a]}
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(P,3));
+  if(pt.n){const n=new Int8Array(XUB64(pt.n).buffer),N=new Float32Array(n.length);for(let i=0;i<n.length;i++)N[i]=n[i]/127;geo.setAttribute('normal',new THREE.BufferAttribute(N,3))}
+  if(pt.c){const c=XUB64(pt.c),C=new Float32Array(c.length);for(let i=0;i<c.length;i++)C[i]=c[i]/255;geo.setAttribute('color',new THREE.BufferAttribute(C,3))}
+  if(pt.i){const ib=XUB64(pt.i);geo.setIndex(new THREE.BufferAttribute(pt.i32?new Uint32Array(ib.buffer):new Uint16Array(ib.buffer),1))}
+  if(!pt.n)geo.computeVertexNormals();geo.computeBoundingSphere();return{geo,m:pt.m}})}
+
+const XG={inbox:'plat_inbox_gb',outbox:'plat_inbox_ts',RATE:350};
+const GB2TS={flake:'gold',nugget:'gold',magnetite:'magnetite',garnet:'garnet',zircon:'zircon',pyrite:'pyrite',sapphire:'corundum',quartz:'quartz',pyriteCube:'pyrite',garnetX:'garnet',amethyst:'amethyst',rutile:'rutile',cassiterite:'cassiterite',scheelite:'scheelite',staurolite:'staurolite',kyanite:'kyanite',molybdenite:'molybdenite',fluorite:'fluorite',calcite:'calcite',willemite:'willemite',hematite:'hematite',galena:'galena',sphalerite:'sphalerite',cinnabar:'cinnabar',copper:'copper',malachite:'malachite',ruby:'corundum',barite:'barite',tourmaline:'elbaite',beryl:'beryl',topaz:'topaz',amazonite:'microcline',muscovite:'muscovite',lepidolite:'lepidolite',selenite:'gypsum',aragonite:'aragonite',azurite:'azurite',celestine:'celestine',benitoite:'benitoite',alexandrite:'chrysoberyl',spinel:'spinel',arsenopyrite:'arsenopyrite',chalcopyrite:'chalcopyrite',epidote:'epidote',spodumene:'spodumene',apatite:'apatite',cerussite:'cerussite',vanadinite:'vanadinite',wulfenite:'wulfenite'};
+const XBOOK={};
+function xReg(s){const k=s.k;if(IT[k])return;const gk=s.xgk&&IT[s.xgk]?s.xgk:null;
+ IT[k]={n:s.xn+' [탐석]',v:Math.max(1,Math.round(s.xv)),c:s.xc||'#8fd0ff',b:k,ext:1};
+ SPX[k]=gk?SPX[gk].slice():[Math.max(1,Math.round(s.mm*.6)),Math.max(2,Math.round(s.mm*1.4)),.3,2.7,'x'];SPX[k][4]='x';
+ SPEC[k]=Object.assign({},gk?SPEC[gk]:{sys:'—',hab:'탐석에서 옮겨 온 표본',lus:'—',size:'—',ax:'hex'},{st:gk?SPEC[gk].st:null,uv:!!s.xglow});
+ XBOOK[k]={id:k,n:s.xn,c:s.xc||'#8fd0ff',f:gk?(BOOK.find(b=>b.id===IT[gk].b)||{}).f||'—':'—',sg:'—',h:'—',rep:k,t:'탐석에서 옮겨 온 표본이에요. 모양은 탐석에서의 모습 그대로이고, 가격은 금빛 여울 기준으로 다시 매겼어요. 탐석으로 돌려보내면 원래 가격으로 돌아가요.'};
+ BUILD[k]=()=>({o:xVisBuild(SP&&SP.vis)})}
+function xVisBuild(vis){const g=new THREE.Group();if(!vis)return g;xVisGeos(THREE,vis).forEach(({geo,m})=>{const col=new THREE.Color(m.col[0],m.col[1],m.col[2]),vc=!!geo.attributes.color;let o;
+  if(m.metal>.5)o=metal(geo,{col,rough:m.rough??.2,vc});else o=gem(geo,{col,op:m.op??1,rough:m.rough??.1,disp:m.disp??.25,vc,glow:m.glow?LC(parseInt(m.glow,16)).multiplyScalar(1.3):undefined});g.add(o)});return g}
+function xGbMat(mt){if(mt.isMeshBasicMaterial)return null;const u=mt.uniforms;
+ if(u&&u.uCol){const gl=u.uGlow&&u.uGlow.value,gh=gl&&(gl.r+gl.g+gl.b)>.05?gl.clone().convertLinearToSRGB().getHexString():null;return{col:[u.uCol.value.r,u.uCol.value.g,u.uCol.value.b],op:u.uOp?u.uOp.value:1,rough:u.uRough?u.uRough.value:.2,metal:u.uMetal&&u.uMetal.value>.5?1:0,disp:u.uDisp?u.uDisp.value:.2,glow:gh}}
+ if(mt.color)return{col:[mt.color.r,mt.color.g,mt.color.b],op:mt.transparent?mt.opacity:1,rough:mt.roughness??.8,metal:mt.metalness??0,disp:0};return null}
+function xSendToTS(s){if(!s)return;if(isDisp(s)){toast('전시 중인 표본은 먼저 전시장에서 내려 주세요');return}
+ let item;if(s.ext==='ts'&&s.xorig)item={back:1,orig:s.xorig};
+ else{const obj=buildMineral(s.k,s),vis=xVisEncode(THREE,obj,xGbMat);obj.traverse(o=>{if(o.geometry)o.geometry.dispose()});if(!vis){toast('이 표본은 옮길 수 없어요');return}
+  let base=1;try{base=specValue(Object.assign({},s,{var:null,tags:[],pol:null,cut:null,dirt:0,stain:0,peb:0}))}catch(e){}
+  let gl=null;try{const V=varOf(s);if(V&&V.glow)gl=new THREE.Color(V.glow).getHexString();else vis.parts.some(p=>p.m.glow&&(gl=p.m.glow))}catch(e){}
+  item={from:'gb',name:(s.cut?'세공 ':'')+IT[s.k].n+(varOf(s)?' · '+varOf(s).n.split(' (')[0]:''),gbk:s.k,tsk:GB2TS[s.k]||null,sizeCm:Math.max(.1,Math.round(s.mm)/10),grade:XQ2G(SPX[s.k][4]==='x'?s.q:.6),mult:Math.max(.3,Math.min(20,s.v/Math.max(1,base))),val:s.v,c:IT[s.k].c,glow:gl,vis,orig:s}}
+ if(!xInboxPut(XG.outbox,item)){toast('저장 공간이 부족해서 보낼 수 없어요');return}
+ S.specs=S.specs.filter(x=>x!==s);save();hud();toast(`${IT[s.k].n}을(를) 탐석으로 보냈어요${s.ext==='ts'?' · 원래 가격으로 돌아가요':''}`,'g');if(viewer.on&&viewer.src==='bag')showBag()}
+function xPoll(){const A=xInboxTake(XG.inbox);if(!A.length)return;let n=0;
+ for(const it of A){try{if(it.back&&it.orig){const s=it.orig;S.nid=(S.nid||0)+1;s.id=S.nid;if(s.ext==='ts')xReg(s);S.specs.push(s);n++;continue}
+  const gk=it.gbk&&IT[it.gbk]&&!IT[it.gbk].ext?it.gbk:null;let v;
+  if(gk&&SPX[gk][4]!=='b'){const f={k:gk,mm:Math.max(.3,it.sizeCm*10),q:XGQ[it.grade]??.6,imp:.25,ci:.5,tags:[],n:1,dirt:0,stain:0,pur:.9,seed:1};try{v=specValue(f)*it.mult}catch(e){v=it.val/XG.RATE}}else v=it.val/XG.RATE;
+  v=Math.max(1,Math.round(v));S.nid=(S.nid||0)+1;const id=S.nid,mm=Math.max(.3,it.sizeCm*10);
+  const s={id,k:'xts_'+id+'_'+Math.random().toString(36).slice(2,6),ext:'ts',xn:it.name,xc:it.c||'#8fd0ff',xgk:gk,xglow:it.glow||null,mm,g:+(Math.pow(mm/10,3)*.35*2.8).toFixed(2),q:XGQ[it.grade]??.6,imp:0,ci:.5,tags:[],n:1,dirt:0,stain:0,seed:Math.floor(Math.random()*1e9),v,xv:v,vis:it.vis,xorig:it.orig};
+  xReg(s);S.specs.push(s);n++}catch(e){console.warn('표본 받기 실패',e)}}
+ if(n){save();hud();toast(`탐석에서 표본 ${n}개가 도착했어요`,'g')}}
+S.specs.filter(x=>x.ext==='ts').forEach(xReg);
+setInterval(xPoll,2000);setTimeout(xPoll,500);
+addEventListener('message',e=>{const d=e.data;if(!d||!d.plat)return;if(d.plat==='freeze'){window.__FROZEN=true;try{AC&&AC.suspend()}catch(er){}}else if(d.plat==='thaw'){window.__FROZEN=false;try{AC&&AC.resume()}catch(er){}xPoll()}});
+
 // ---------- UI ----------
 const toast=(t,c='')=>{const d=document.createElement('div');d.className='toast '+c;d.textContent=t;$('#toasts').appendChild(d);setTimeout(()=>d.remove(),2600)};
 function hud(){$('#money').textContent=fmt(S.money);const cap=upv('bucket');let h='';for(let i=0;i<cap;i++)h+=`<i class="${i<loads.length?'f':''}"></i>`;$('#loads').innerHTML=h}
@@ -1952,6 +2024,7 @@ card.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)retur
  else if(t.dataset.go){const g=t.dataset.go;if(g==='online')openOnline();else if(g==='shop')showShop();else if(g==='auc')openAuction();else if(g==='travel')openTravel();else if(g==='work')openWork();else if(g==='sort')startSort();else if(g==='sortbag'&&(S.sbag||[]).length){const b=S.sbag.shift();save();startSort(b)}else if(g==='disp')openDisplay();else if(g==='bag')showBag();else if(g==='book')showBook();else if(g==='snd'){setMute();openMenu()}}
  else if(t.dataset.act)workAction(t.dataset.act);
  else if(t.dataset.disp)toggleDisp(t.dataset.disp);
+ else if(t.dataset.xsend){const sp=S.specs.find(x=>x.id==t.dataset.xsend);xSendToTS(sp)}
  else if(t.dataset.sym){if(viewer.cut){viewer.cut.sym=+t.dataset.sym;cutPanel()}}
  else if(t.dataset.cut)cutAction(t.dataset.cut);
  else if(t.dataset.wt){setWTool(viewer.tool===t.dataset.wt&&t.classList.contains('act')?'rot':t.dataset.wt);workPanel()}
@@ -2002,23 +2075,22 @@ const jend=e=>{if(e.pointerId===jid){jid=null;jx=jy=0;knob.style.transform=''}};
 $('#act').addEventListener('click',()=>doAction());if(MP_ON){$('#chatHead').addEventListener('click',()=>{const c=$('#chat');c.classList.toggle('open');if(c.classList.contains('open'))$('#chatIn').focus()});$('#chatGo').addEventListener('click',chatSend)}$('#bagb').addEventListener('click',()=>doBag());
 
 // ---------- 게임 상태 ----------
-const pl={x:SX+6,z:SZ,face:Math.PI/2,walk:0};if(REG==='cave'){const L=new THREE.PointLight(LC(0xffc98a),2.6,20,1.5);L.position.set(.2,2.3,.4);P.add(L);const bulb=new THREE.Mesh(new THREE.SphereGeometry(.07,10,8),new THREE.MeshBasicMaterial({color:new THREE.Color(2,1.5,.8),toneMapped:false}));bulb.position.set(.15,1.75,.25);P.add(bulb)}let busy=null,ctx=null;
+const pl={x:SX+6,z:SZ,face:Math.PI/2,walk:0};if(REG==='cave'){const L=new THREE.PointLight(LC(0xffc98a),2.6,20,1.5);L.position.set(.2,2.3,.4);P.add(L);lanternMesh(PJ.hand[0],0,-.36,.02,null).scale.setScalar(.8);{const h=new THREE.Mesh(new THREE.TorusGeometry(.03,.004,5,10,Math.PI),hqMat('iron'));h.position.set(0,-.11,.02);PJ.hand[0].add(h)}}let busy=null,ctx=null;
 function context(){const inW=WL-H(pl.x,pl.z)>.06;
   for(const o of outcrops)if(Math.hypot(pl.x-o.x,pl.z-o.z)<3.6)return{k:'rock',o,inW};
  let best=null,bd=1.9;for(const s of spots){const d=Math.hypot(pl.x-s.x,pl.z-s.z);if(d<bd){bd=d;best=s}}if(best)return{k:'spot',s:best,inW};return{k:canDig(pl.x,pl.z)?'ground':null,inW,z:zoneAt(pl.x,pl.z)}}
 const bagCap=()=>1+upv('bucket');const canBag=c=>!busy&&(c.k==='spot'||c.k==='ground')&&!c.inW&&(S.sbag||[]).length<bagCap();
 function doBag(){if(!started||busy||pan.on||modalOn)return;audioInit();const c=context();if(!canBag(c)){if((S.sbag||[]).length>=bagCap())toast('자루가 가득 찼어요 · 메뉴의 자갈 선별에서 쓰세요');return}busy={kind:'bag',t:0,dur:upv('shovel')*1.6,s:c.k==='spot'?c.s:null,tick:0,x:pl.x,z:pl.z}}
-function actionFor(c){const cap=upv('bucket');if(c.k==='shop')return'상점';if(c.k==='rock')return c.o.cd>0?null:'망치질';if(c.k==='spot'&&loads.length<cap)return'퍼담기';if(c.k==='ground'&&loads.length<cap&&!(c.inW&&loads.length))return'퍼담기';if(c.inW&&loads.length)return'패닝';return null}
+function actionFor(c){const cap=upv('bucket');if(c.k==='rock')return c.o.cd>0?null:'망치질';if(c.k==='spot'&&loads.length<cap)return'퍼담기';if(c.k==='ground'&&loads.length<cap&&!(c.inW&&loads.length))return'퍼담기';if(c.inW&&loads.length)return'패닝';return null}
 function hintFor(c){const h=hintFor0(c);if(!busy&&canBag(c))return h+`<span class="sub"><span class="k">F</span> 선별용 자갈 자루에 담기 (${(S.sbag||[]).length}/${bagCap()})</span>`;return h}
 function hintFor0(c){const cap=upv('bucket'),lens=upv('lens'),K='<span class="k">E</span>',sub=t=>`<span class="sub">${t}</span>`;
  if(busy)return busy.kind==='dig'?'자갈을 퍼담는 중…':busy.kind==='bag'?'선별용 자갈을 자루에 담는 중…':'망치질하는 중…';
- if(c.k==='shop')return`${K}<b>${REG==='river'?'광물 상점':'캠프 상점'}</b>${sub('표본을 팔고 장비를 업그레이드해요')}`;
  if(c.k==='rock'){const ln=LITH[c.o.lith].n;return c.o.cd>0?`<b>${ln}</b>${sub(Math.ceil(c.o.cd)+'초 뒤 다시 결정이 드러나요')}`:`${K}<b>${ln}</b> 망치질${sub({schist:'석류석 · 십자석 · 남정석 · 적철석 · 루비',vein:'석영 · 황철석 · 형석 · 방연석 · 섬아연석 · 방해석',peg:'전기석 · 녹주석 · 토파즈 · 아마조나이트 · 운모',granite:'백운모 · 석영 · 아마조나이트 · 전기석',cavexl:'투명석고 · 아라고나이트 · 천청석 · 방해석',oxide:'남동석 · 공작석 · 자연동'})[c.o.lith]}`}
  if(c.k==='spot'){const T=TYPES[c.s.type],r=lens?` · 함량 ${richLabel(c.s.rich)}`:'';if(loads.length>=cap)return c.inW?`${K}<b>패닝</b>${sub('양동이가 가득 찼어요. 여기서 바로 씻을 수 있어요')}`:`<b>양동이가 가득 찼어요</b>${sub('물에 들어가 패닝하세요')}`;return`${K}<b>${T.n}</b>${r} · ${c.s.left}통 남음${sub(T.tip)}`}
  if(c.k==='ground'&&loads.length<cap&&!(c.inW&&loads.length)){const z=c.z,zn=z.zone&&z.zs>.15;return`${K}<b>여기 자갈 퍼담기</b>${lens&&zn?` · ${ZM[z.zone].n} ${z.zs>.7?'한가운데':'근처'}`:''}${sub(zn&&z.zs>.5?(lens?'광물이 훨씬 잘 나오는 구간이에요':'자갈 색이 심상치 않아요…'):'어디서든 팔 수 있지만, 광맥 구간을 찾으면 훨씬 잘 나와요')}`}
  if(loads.length&&c.inW)return`${K}<b>패닝</b>${sub('접시를 돌려 모래를 씻어내요')}`;if(loads.length)return`<b>자갈 ${loads.length}통</b>${sub('물속으로 들어가 패닝하세요')}`;return`반짝이는 자갈 자리를 찾아보세요${sub('지도의 노란 점')}`}
 function doAction(){if(!started||busy||pan.on||modalOn)return;audioInit();const c=context(),a=actionFor(c);if(!a)return;
- if(a==='상점')showShop();else if(a==='망치질')busy={kind:'rock',t:0,dur:1,o:c.o,tick:0};else if(a==='퍼담기')busy={kind:'dig',t:0,dur:upv('shovel')*(c.s?1:1.35),s:c.s,tick:0,x:pl.x,z:pl.z};else if(a==='패닝')openPanWrap(loads.shift())}
+ if(a==='망치질')busy={kind:'rock',t:0,dur:1,o:c.o,tick:0};else if(a==='퍼담기')busy={kind:'dig',t:0,dur:upv('shovel')*(c.s?1:1.35),s:c.s,tick:0,x:pl.x,z:pl.z};else if(a==='패닝')openPanWrap(loads.shift())}
 function finishBusy(){const b=busy;busy=null;P.userData.shovel.visible=false;$('#prog').style.display='none';
  if(b.kind==='bag'){const z=zoneAt(b.x,b.z);let r=TYPES.free.base*(1+z.zs*1.2)*rnd(.8,1.2);if(b.s&&spots.includes(b.s)){r=b.s.rich;b.s.left--;if(b.s.left<=0){removeSpot(b.s)}}else addHole(b.x,b.z);S.sbag=S.sbag||[];S.sbag.push({r:+r.toFixed(2),zs:z.zs,reg:REG});save();hud();sfx.dig();toast(`선별용 자갈 자루 ${S.sbag.length}/${bagCap()} · 메뉴의 자갈 선별에서 쓸 수 있어요`,'g');return}
  if(b.kind==='dig'){if(!b.s){const z=zoneAt(b.x,b.z);loads.push({r:TYPES.free.base*rnd(.8,1.2)*(1+z.zs*1.2),type:'free',zone:z.zone,zs:z.zs});addHole(b.x,b.z);hud();if(z.zs>.5&&!S.zoneSeen){S.zoneSeen=1;toast('흙 색이 다르네요… 여긴 뭔가 있을 것 같아요','g')}return}if(!spots.includes(b.s))return;const zz=zoneAt(b.s.x,b.s.z);loads.push({r:b.s.rich,type:b.s.type,zone:zz.zone,zs:zz.zs});b.s.left--;if(b.s.left<=0){removeSpot(b.s);toast('이 자리는 다 퍼냈어요')}hud()}
@@ -2108,6 +2180,7 @@ let last=performance.now(),mt=0,titleA=0;const tgt=new THREE.Vector3(),UPV=new T
 const camObs=[];let camD=9;
 function camBlock(tx,ty,tz,dx,dy,dz,maxD){camObs.length=0;for(const o of obst){const dd=Math.hypot(o.x-tx,o.z-tz);if(dd<maxD+o.r+1)camObs.push(o)}
  for(let t=.3;t<=maxD;t+=.15){const x=tx+dx*t,y=ty+dy*t,z=tz+dz*t;if(y<H(x,z)+.3||(REG==='cave'&&y>ceilH(x,z)-.45))return t;for(const o of camObs){const top=o.top==null?H(o.x,o.z)+3:o.top;if(y<top&&(x-o.x)**2+(z-o.z)**2<(o.r+.3)**2)return t}}return maxD}
+const UIE={},UIC={};let uiT=0;function setUI(id,h){const e=UIE[id]||(UIE[id]=$('#'+id));if(!UIE.bagb)UIE.bagb=$('#bagb');if(UIC[id]!==h){UIC[id]=h;e.innerHTML=h}}
 function update(dt,t){
  let ix=0,iz=0;if(started&&!busy&&!modalOn){ix=((keys.KeyD||keys.ArrowRight)?1:0)-((keys.KeyA||keys.ArrowLeft)?1:0)+jx;iz=((keys.KeyW||keys.ArrowUp)?1:0)-((keys.KeyS||keys.ArrowDown)?1:0)-jy}
  const m=Math.hypot(ix,iz),depth=WL-H(pl.x,pl.z);
@@ -2117,7 +2190,7 @@ function update(dt,t){
   if(H(nx,nz)<9){for(const o of obst){const dx=nx-o.x,dz=nz-o.z,d=Math.hypot(dx,dz),rr=o.r+.35;if(d<rr&&d>1e-4){nx=o.x+dx/d*rr;nz=o.z+dz/d*rr}}pl.x=nx;pl.z=nz}
   const ta=Math.atan2(vx,vz);let da=ta-pl.face;while(da>Math.PI)da-=TAU;while(da<-Math.PI)da+=TAU;pl.face+=da*Math.min(1,dt*12);pl.walk+=dt*sp*1.6}else pl.walk*=.85;
  const y=H(pl.x,pl.z);P.position.set(pl.x,y,pl.z);P.rotation.y=pl.face;
- const sv=Math.sin(pl.walk)*(m>.08?.6:0);legs[0].rotation.x=sv;legs[1].rotation.x=-sv;arms[0].rotation.x=-sv*.8;arms[1].rotation.x=sv*.8;
+ animPlayer(dt,m>.08?m:0);
  if(busy){busy.t+=dt;const k=busy.t/busy.dur;$('#prog').style.display='block';$('#prog i').style.width=Math.min(k,1)*100+'%';P.userData.shovel.visible=true;const ph=Math.sin(busy.t*(busy.kind!=='rock'?9:14));arms[1].rotation.x=-1.2+ph*.7;arms[0].rotation.x=-.6+ph*.3;
   busy.tick-=dt;if(busy.tick<=0){if(busy.kind==='dig'||busy.kind==='bag'){sfx.dig();busy.tick=.35}else{sfx.clink();busy.tick=.3}}if(k>=1)finishBusy()}
  tgt.set(pl.x,y+1.4,pl.z);if(!started){titleA+=dt*.08;yaw=-Math.PI/2+Math.sin(titleA)*.6}
@@ -2128,12 +2201,18 @@ function update(dt,t){
  const lens=upv('lens');for(const s of spots){s.rm.opacity=.15+.15*Math.sin(t*3+s.x);if(lens)s.rm.color.setHex(s.rich>=2?0xff8a1f:s.rich>=1.3?0xffc23a:0xf4e6a8);for(const k of s.sp){const v=Math.max(0,Math.sin(t*k.userData.sp+k.userData.ph));const sc=v*v*.32;k.scale.set(sc,sc,1)}}
  for(let i=respawnQ.length-1;i>=0;i--){respawnQ[i].t-=dt;if(respawnQ[i].t<=0){if(spawn(respawnQ[i].type))respawnQ.splice(i,1);else respawnQ[i].t=2}}
  for(const o of outcrops){if(o.cd>0){o.cd-=dt;if(o.cd<=0){o.cd=0;o.crys.forEach(m=>m.visible=true)}}}
- if(started){ctx=context();const a=busy?null:actionFor(ctx);const ab=$('#act');ab.disabled=!a||modalOn;ab.innerHTML=`${a||'행동'}<small>E</small>`;$('#bagb').style.display=!modalOn&&canBag(ctx)?'':'none';$('#hint').innerHTML=hintFor(ctx);
+ uiT-=dt;if(started&&uiT<=0){uiT=.1;ctx=context();const a=busy?null:actionFor(ctx);setUI('act',`${a||'행동'}<small>E</small>`);const ab=UIE.act,dis=!a||modalOn;if(ab.disabled!==dis)ab.disabled=dis;const bd=!modalOn&&canBag(ctx)?'':'none';if(UIE.bagb.style.display!==bd)UIE.bagb.style.display=bd;setUI('hint',hintFor(ctx));
   if(waterG&&AC){const tt=REG==='river'?info(pl.x,pl.z).t:40;waterG.gain.setTargetAtTime(muted?0:(REG==='cave'?.035:.025+.1*(1-sstep(0,25,tt)))*aVol(),AC.currentTime,.3)}}
  mt-=dt;if(mt<=0){drawMini();mt=.15}}
 let loopErr=0;
-function loop(now){requestAnimationFrame(loop);const dt=Math.min(.05,(now-last)/1000);last=now;const t=now/1000;GT.value=t%1000;mpTick(t);if(t-aucLast>1){aucLast=t;try{aucTick()}catch(e){}}
- try{if(inRoom&&!modalOn&&!sort.on&&!disp.on&&started)openMenu();if(pan.on){panStep(dt);panDraw(t)}else if(inRoom){roomFrame(dt);if(viewer.on)viewerFrame(dt)}else if(viewer.on){viewerFrame(dt)}else{update(dt,t);for(const f of ANIM)f(dt,t);R.render(scene,cam)}}
+// 성능 자동 조절: 프레임이 느리면 해상도·그림자 품질을 낮추고, 여유가 생기면 다시 올림
+const PERF={ema:16,t:0,pr:Math.min(devicePixelRatio,1.75),max:Math.min(devicePixelRatio,1.75),low:false};
+function perfStep(dt){PERF.ema+=(dt*1000-PERF.ema)*.05;PERF.t+=dt;if(PERF.t<2.5)return;PERF.t=0;
+ if(PERF.ema>24&&PERF.pr>1){PERF.pr=Math.max(1,PERF.pr-.25);R.setPixelRatio(PERF.pr);resize()}
+ else if(PERF.ema>26&&PERF.pr<=1&&!PERF.low&&sun.shadow.mapSize.x>2048){PERF.low=true;sun.shadow.mapSize.set(2048,2048);if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null}}
+ else if(PERF.ema<13&&PERF.pr<PERF.max){PERF.pr=Math.min(PERF.max,PERF.pr+.25);R.setPixelRatio(PERF.pr);resize()}}
+function loop(now){requestAnimationFrame(loop);if(window.__FROZEN){last=now;return}const dt=Math.min(.05,(now-last)/1000);last=now;const t=now/1000;GT.value=t%1000;mpTick(t);if(t-aucLast>1){aucLast=t;try{aucTick()}catch(e){}}
+ try{if(inRoom&&!modalOn&&!sort.on&&!disp.on&&started)openMenu();if(pan.on){panStep(dt);panDraw(t)}else if(inRoom){roomFrame(dt);if(viewer.on)viewerFrame(dt)}else if(viewer.on){viewerFrame(dt)}else{update(dt,t);for(const f of ANIM)f(dt,t);R.render(scene,cam)}perfStep(dt)}
  catch(err){if(loopErr++<3){console.error(err);if(loopErr===1)toast('화면 처리 중 오류: '+(err&&err.message||err))}}}
 scene.traverse(o=>{if(o.isInstancedMesh)o.frustumCulled=false});setTimeout(shaderHealth,2500);setTimeout(shaderHealth,8000);requestAnimationFrame(loop);hud();$('#loading').style.display='none';$('#title h1').textContent=REG==='river'?'금빛 여울':REGIONS[REG].n;
 setTimeout(()=>{try{buildRoom();R.compile(room,roomCam);R.compile(scene,cam)}catch(e){console.error(e)}},1200);
