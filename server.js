@@ -46,6 +46,10 @@ const send = (ws, o) => { if (ws.readyState === 1) ws.send(JSON.stringify(o)); }
 const bc = o => { const s = JSON.stringify(o); wss.clients.forEach(c => { if (c.readyState === 1) c.send(s); }); };
 const socketsOf = id => [...conns].filter(([, i]) => i === id).map(([w]) => w);
 const online = () => new Set(conns.values()).size;
+// 공유 지역 '만남의 여울': 접속 중인 플레이어 위치 (저장하지 않음)
+const PLAZA = new Map();
+const plazaSend = (o, except) => { const s = JSON.stringify(o); for (const [w, pid] of conns) if (pid !== except && PLAZA.has(pid) && w.readyState === 1) w.send(s); };
+const plazaLeave = id => { if (PLAZA.delete(id)) { plazaSend({ t: 'pgone', id }, id); bc({ t: 'online', n: online(), pz: PLAZA.size }); } };
 const clean = (t, n) => String(t == null ? '' : t).replace(/[\u0000-\u001f]/g, '').slice(0, n);
 const specName = s => clean((s && s.nm) || '표본', 40);
 
@@ -108,7 +112,7 @@ wss.on('connection', ws => {
       dirty = true;
       send(ws, { t: 'welcome', chat: D.chat.slice(-40), rank: rank(), players: players(), auc: aucList(), online: online() });
       if ((D.mail[pid] || []).length) send(ws, { t: 'mail', mail: D.mail[pid] });
-      bc({ t: 'online', n: online() }); bc({ t: 'auc', auc: aucList() }); pushRank();
+      bc({ t: 'online', n: online(), pz: PLAZA.size }); bc({ t: 'auc', auc: aucList() }); pushRank();
       return;
     }
     if (!id) return;
@@ -116,7 +120,7 @@ wss.on('connection', ws => {
     if (m.t === 'chat') {
       const text = clean(m.text, 200).trim(); if (!text) return;
       const now = Date.now(); if (p.lastChat && now - p.lastChat < 700) return; p.lastChat = now;
-      const c = { t: 'chat', name: p.name, text, ts: now };
+      const c = { t: 'chat', id, name: p.name, text, ts: now };
       D.chat.push(c); if (D.chat.length > 60) D.chat.shift(); dirty = true; bc(c);
     } else if (m.t === 'profile') {
       p.profile = m.profile || {}; p.disp = Array.isArray(m.disp) ? m.disp.slice(0, 40) : []; dirty = true; pushRank();
@@ -145,6 +149,20 @@ wss.on('connection', ws => {
       dirty = true; send(ws, { t: 'bidok', lid: a.lid, amt });
       if (prev) mail(prev.id, { type: 'refund', lid: a.lid, amt: prev.amt });
       bc({ t: 'auc', auc: aucList() });
+    } else if (m.t === 'zone') {
+      if (m.z === 'plaza') {
+        if (!PLAZA.has(id)) {
+          PLAZA.set(id, { name: p.name, x: +m.x || 0, z: +m.z2 || 0, f: 0, st: 0 });
+          send(ws, { t: 'peers', list: [...PLAZA].filter(([k]) => k !== id).map(([k, v]) => ({ id: k, name: v.name, x: v.x, z: v.z, f: v.f })) });
+          plazaSend({ t: 'ppos', id, name: p.name, x: +m.x || 0, z: +m.z2 || 0, f: 0 }, id);
+          bc({ t: 'online', n: online(), pz: PLAZA.size });
+        }
+      } else plazaLeave(id);
+    } else if (m.t === 'pos') {
+      const q = PLAZA.get(id); if (!q) return;
+      const now = Date.now(); if (now - q.st < 70) return; q.st = now;
+      q.x = Math.max(-200, Math.min(200, +m.x || 0)); q.z = Math.max(-200, Math.min(200, +m.z || 0)); q.f = +m.f || 0; q.name = p.name;
+      plazaSend({ t: 'ppos', id, name: p.name, x: q.x, z: q.z, f: q.f }, id);
     } else if (m.t === 'aend' || m.t === 'acancel') {
       // 판매자가 즉시 마감(최고가에 낙찰) 또는 취소(입찰금 환불, 표본 반환)
       const a = D.auc[clean(m.lid, 80)];
@@ -162,7 +180,7 @@ wss.on('connection', ws => {
       const L = D.mail[id]; if (L) { D.mail[id] = L.filter(x => x.mid !== m.mid); dirty = true; }
     }
   });
-  ws.on('close', () => { conns.delete(ws); bc({ t: 'online', n: online() }); });
+  ws.on('close', () => { const id = conns.get(ws); conns.delete(ws); if (id && !socketsOf(id).length) plazaLeave(id); bc({ t: 'online', n: online(), pz: PLAZA.size }); });
 });
 /* ============================ 탐석 ============================
    같은 시드 = 같은 방(위치 동기화, 바위 파괴 공유, 표본 선착순), 박물관 공개/방문, 표본 거래소 */
