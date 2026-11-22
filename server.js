@@ -145,6 +145,19 @@ wss.on('connection', ws => {
       dirty = true; send(ws, { t: 'bidok', lid: a.lid, amt });
       if (prev) mail(prev.id, { type: 'refund', lid: a.lid, amt: prev.amt });
       bc({ t: 'auc', auc: aucList() });
+    } else if (m.t === 'aend' || m.t === 'acancel') {
+      // 판매자가 즉시 마감(최고가에 낙찰) 또는 취소(입찰금 환불, 표본 반환)
+      const a = D.auc[clean(m.lid, 80)];
+      if (!a) { send(ws, { t: 'biderr', msg: '이미 끝난 경매예요' }); return; }
+      if (a.sid !== id) { send(ws, { t: 'biderr', msg: '내 출품만 마감하거나 취소할 수 있어요' }); return; }
+      if (m.t === 'aend') { resolve(a); send(ws, { t: 'aended', lid: a.lid, sold: !!a.top }); }
+      else {
+        delete D.auc[a.lid]; dirty = true;
+        if (a.top) mail(a.top.id, { type: 'refund', lid: a.lid, amt: a.top.amt, why: 'cancel' });
+        mail(a.sid, { type: 'unsold', lid: a.lid, why: 'cancel' });
+        sysChat(`${a.sname}님이 ${a.name} 경매를 취소했어요`);
+        send(ws, { t: 'acanceled', lid: a.lid }); bc({ t: 'auc', auc: aucList() });
+      }
     } else if (m.t === 'ack') {
       const L = D.mail[id]; if (L) { D.mail[id] = L.filter(x => x.mid !== m.mid); dirty = true; }
     }
